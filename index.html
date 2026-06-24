@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أُنس</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* ════ 🎨 الألوان الرئيسية (درجات الموف) ════ */
+  --green:#894889; --green-light:#a362a3; --green-dark:#5c2b5c;
+  --gold:#B366B3; --gold-light:#CC88CC;
+  --beige:#E6D0E6; --beige-dark:#D1B3D1;
+  --white:#ffffff; --text:#321c32; --text-muted:#7a527a;
+  --border:rgba(137,72,137,0.15); --shadow:0 2px 12px rgba(137,72,137,0.10);
+  --radius:14px; --radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',sans-serif;background:var(--beige);color:var(--text);min-height:100vh;direction:rtl;}
+body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23894889' fill-opacity='1'%3E%3Cpath d='M30 0l8.66 5v10L30 20l-8.66-5V5L30 0zm0 40l8.66 5v10L30 60l-8.66-5V45L30 40zM0 20l8.66 5v10L0 40l-8.66-5V25L0 20zM60 20l8.66 5v10L60 40l-8.66-5V25L60 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+
+/* ── Shared overlay screens ── */
+.full-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;}
+.full-screen.hidden{display:none;}
+.full-screen.bg-dark{background:var(--green-dark);}
+.full-screen.bg-overlay{background:rgba(0,0,0,0.7);}
+
+/* ── Role picker ── */
+.role-box{background:var(--white);border-radius:var(--radius);padding:36px 28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.4);border-top:4px solid var(--gold);text-align:center;}
+.role-box .crescent{font-size:44px;display:block;margin-bottom:10px;color:#ffffff;}
+.role-box h2{font-size:19px;font-weight:800;color:var(--green-dark);margin-bottom:6px;}
+.role-box p{font-size:12px;color:var(--text-muted);margin-bottom:28px;}
+.role-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px;}
+.role-card{padding:22px 14px;border-radius:var(--radius);border:2px solid var(--border);cursor:pointer;transition:all 0.2s;background:var(--beige);}
+.role-card:hover{border-color:var(--green);background:rgba(137,72,137,0.04);transform:translateY(-2px);}
+.role-card .r-icon{font-size:32px;display:block;margin-bottom:10px;}
+.role-card .r-title{font-size:14px;font-weight:700;color:var(--green-dark);}
+.role-card .r-desc{font-size:11px;color:var(--text-muted);margin-top:4px;}
+
+/* ── Auth box ── */
+.auth-box{background:var(--white);border-radius:var(--radius);padding:36px 32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.4);border-top:4px solid var(--gold);text-align:center;}
+.auth-box .crescent{font-size:36px;display:block;margin-bottom:8px;color:#ffffff;}
+.auth-box h2{font-size:17px;font-weight:800;color:var(--green-dark);margin-bottom:3px;}
+.auth-box .sub{font-size:12px;color:var(--text-muted);margin-bottom:20px;}
+.auth-role-tag{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:18px;}
+.auth-role-tag.teacher{background:rgba(137,72,137,0.12);color:var(--green);}
+.auth-role-tag.student{background:rgba(179,102,179,0.2);color:#733073;}
+.auth-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:14px;margin-bottom:12px;direction:rtl;text-align:right;background:var(--beige);}
+.auth-input:focus{outline:none;border-color:var(--green);background:white;}
+.auth-btn{width:100%;padding:11px;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;}
+.auth-btn:hover{background:var(--green-light);}
+.auth-btn.secondary{background:transparent;color:var(--green);border:1.5px solid var(--green);margin-bottom:0;}
+.auth-btn.gold{background:var(--gold);}
+.auth-btn.gold:hover{background:var(--gold-light);}
+.auth-err{color:#c0392b;font-size:12px;margin-bottom:10px;min-height:18px;}
+.auth-back{font-size:12px;color:var(--text-muted);cursor:pointer;margin-top:12px;display:inline-block;}
+.auth-back:hover{color:var(--green);}
+
+/* ── Loading ── */
+#loading-screen{position:fixed;inset:0;z-index:9997;background:var(--beige);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+#loading-screen.show{display:flex;}
+.spinner{width:40px;height:40px;border:3px solid var(--beige-dark);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── Teacher App Layout ── */
+#app{position:relative;z-index:1;display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:240px;min-width:240px;background:var(--green-dark);display:flex;flex-direction:column;border-left:3px solid var(--gold);overflow-y:auto;}
+.sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(179,102,179,0.3);text-align:center;}
+.sidebar-logo .crescent{font-size:32px;display:block;margin-bottom:6px;color:#ffffff;}
+.sidebar-logo h1{color:var(--gold);font-size:24px;font-weight:800;line-height:1.4;}
+.sidebar-logo p{color:rgba(255,255,255,0.6);font-size:12px;margin-top:2px;}
+.sidebar-nav{flex:1;padding:14px 10px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;color:rgba(255,255,255,0.7);font-size:13px;font-weight:500;margin-bottom:3px;transition:all 0.2s;border:1px solid transparent;}
+.nav-item:hover{background:rgba(179,102,179,0.12);color:var(--gold-light);}
+.nav-item.active{background:rgba(179,102,179,0.2);color:var(--gold);border-color:rgba(179,102,179,0.3);}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.sidebar-footer{padding:14px;border-top:1px solid rgba(179,102,179,0.2);}
+.sidebar-footer p{color:rgba(255,255,255,0.3);font-size:10px;text-align:center;}
+.user-info{padding:10px 14px;margin:8px;background:rgba(255,255,255,0.05);border-radius:var(--radius-sm);}
+.user-info p{color:rgba(255,255,255,0.6);font-size:11px;word-break:break-all;}
+.logout-btn{width:100%;padding:7px;background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);color:#ff8f80;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;margin-top:6px;}
+.logout-btn:hover{background:rgba(231,76,60,0.25);}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 1px 8px rgba(137,72,137,0.06);}
+.topbar h2{font-size:17px;font-weight:700;color:var(--green-dark);}
+.topbar-actions{display:flex;align-items:center;gap:10px;}
+.content{flex:1;overflow-y:auto;padding:24px;}
+
+/* ── Student Portal ── */
+#student-portal{position:relative;z-index:1;min-height:100vh;display:none;}
+.portal-header{background:var(--green-dark);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--gold);}
+.portal-header h1{color:var(--gold);font-size:16px;font-weight:700;}
+.portal-header .crescent{font-size:22px;margin-left:8px;color:#ffffff;}
+.portal-content{max-width:700px;margin:0 auto;padding:24px 16px;}
+.portal-hero{background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:var(--radius);padding:24px;color:white;margin-bottom:20px;display:flex;align-items:center;gap:18px;}
+.portal-avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:var(--gold);flex-shrink:0;}
+.portal-hero h2{font-size:19px;font-weight:800;margin-bottom:4px;}
+.portal-hero p{font-size:12px;opacity:0.8;}
+.portal-pts{color:#ffffff;margin-top:10px;font-size:28px;font-weight:800;color:var(--gold);}
+.portal-pts span{font-size:13px;font-weight:400;opacity:0.8;}
+.portal-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+.portal-stat{background:var(--white);border-radius:var(--radius);padding:16px;text-align:center;border:1px solid var(--border);box-shadow:var(--shadow);}
+.portal-stat .ps-icon{font-size:22px;display:block;margin-bottom:6px;}
+.portal-stat .ps-val{font-size:22px;font-weight:800;color:var(--green-dark);}
+.portal-stat .ps-label{font-size:11px;color:var(--text-muted);margin-top:3px;}
+.portal-section-title{font-size:15px;font-weight:700;color:var(--green-dark);margin-bottom:12px;display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--beige-dark);padding-bottom:8px;}
+.portal-badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+.p-badge{display:flex;flex-direction:column;align-items:center;padding:14px 12px;border-radius:var(--radius);background:var(--white);border:1px solid var(--border);min-width:80px;text-align:center;}
+.p-badge.earned{border-color:var(--gold);background:rgba(179,102,179,0.06);}
+.p-badge .pb-icon{font-size:26px;margin-bottom:6px;filter:grayscale(1);opacity:0.35;}
+.p-badge.earned .pb-icon{filter:none;opacity:1;}
+.p-badge .pb-name{font-size:10px;color:var(--text-muted);font-weight:600;}
+.p-badge.earned .pb-name{color:#733073;}
+.portal-progress{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:20px;box-shadow:var(--shadow);}
+.progress-bar-wrap{background:var(--beige-dark);border-radius:10px;height:10px;overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--green),var(--green-light));transition:width 0.8s;}
+.portal-session{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.portal-session-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.portal-session .surah-name{font-size:15px;font-weight:700;color:var(--green-dark);}
+.portal-session .ayahs{font-size:12px;color:var(--text-muted);}
+.portal-session .s-date{font-size:12px;color:var(--text-muted);}
+.rating-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+.rating-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.rating-pill.mem{background:rgba(137,72,137,0.1);color:var(--green);}
+.rating-pill.taj{background:rgba(150,100,200,0.1);color:#6b3da1;}
+.rating-pill.com{background:rgba(179,102,179,0.15);color:#733073;}
+.stars-sm{color:var(--gold);font-size:12px;letter-spacing:-1px;}
+.portal-mistake-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.portal-mistake-tag{padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:rgba(231,76,60,0.1);color:#c0392b;}
+.portal-mistake-tag.tajweed{background:rgba(150,100,200,0.1);color:#6b3da1;}
+.portal-mistake-tag.pronunciation{background:rgba(155,89,182,0.1);color:#7b4d9e;}
+.portal-summary{font-size:12px;color:var(--text-muted);margin-top:8px;padding:8px 10px;background:var(--beige);border-radius:var(--radius-sm);border-right:3px solid var(--gold);}
+.portal-empty{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:14px;}
+.portal-empty .empty-icon{font-size:48px;display:block;margin-bottom:12px;opacity:0.4;}
+.portal-logout{padding:8px 16px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);color:#ff6b5b;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;}
+.portal-logout:hover{background:rgba(231,76,60,0.2);}
+
+/* ── Shared components ── */
+.btn{padding:8px 18px;border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;}
+.btn-primary{background:var(--green);color:white;}
+.btn-primary:hover{background:var(--green-light);}
+.btn-gold{background:var(--gold);color:white;}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-outline{background:transparent;color:var(--green);border:1.5px solid var(--green);}
+.btn-outline:hover{background:var(--green);color:white;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow);}
+.card-gold{border-top:3px solid var(--gold);}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:18px 16px;box-shadow:var(--shadow);}
+.stat-card .stat-icon{font-size:22px;margin-bottom:8px;display:block;}
+.stat-card .stat-val{font-size:26px;font-weight:800;color:var(--green-dark);line-height:1;}
+.stat-card .stat-label{font-size:12px;color:var(--text-muted);margin-top:4px;}
+.stat-card.gold{border-top:3px solid var(--gold);}
+.stat-card.gold .stat-val{color:#733073;}
+.students-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.student-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:18px;box-shadow:var(--shadow);cursor:pointer;transition:all 0.2s;}
+.student-card:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 6px 20px rgba(137,72,137,0.13);}
+.student-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--green),var(--green-light));color:white;flex-shrink:0;}
+.student-name{font-size:15px;font-weight:700;color:var(--green-dark);}
+.student-meta{font-size:12px;color:var(--text-muted);margin-top:3px;}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-top:6px;}
+.badge-green{background:rgba(137,72,137,0.1);color:var(--green);}
+.badge-gold{background:rgba(179,102,179,0.15);color:#733073;}
+.badge-blue{background:rgba(150,100,200,0.12);color:#6b3da1;}
+.stars{color:var(--gold);font-size:14px;}
+.mini-stats{display:flex;gap:12px;margin-top:10px;}
+.mini-stat{font-size:11px;text-align:center;}
+.mini-stat .val{font-weight:700;color:var(--green);font-size:15px;display:block;}
+.mini-stat .lbl{color:var(--text-muted);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-full{grid-column:1/-1;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:13px;font-weight:600;color:var(--text);}
+.form-group input,.form-group select,.form-group textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:13px;color:var(--text);background:var(--white);transition:border 0.2s;direction:rtl;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(137,72,137,0.08);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.rating-input{display:flex;gap:6px;align-items:center;margin-top:4px;}
+.star-btn{font-size:22px;cursor:pointer;opacity:0.3;transition:all 0.15s;background:none;border:none;padding:0;line-height:1;}
+.star-btn.active{opacity:1;transform:scale(1.15);}
+.section-title{font-size:16px;font-weight:700;color:var(--green-dark);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--beige-dark);display:flex;align-items:center;gap:8px;}
+.session-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.session-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.session-surah{font-size:15px;font-weight:700;color:var(--green-dark);}
+.session-ratings{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;}
+.session-rating-item{font-size:12px;}
+.session-rating-item .r-label{color:var(--text-muted);}
+.session-rating-item .r-val{font-weight:700;color:var(--green);margin-right:3px;}
+.mistake-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.mistake-tag{padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:rgba(231,76,60,0.1);color:#c0392b;}
+.mistake-tag.tajweed{background:rgba(150,100,200,0.1);color:#6b3da1;}
+.mistake-tag.pronunciation{background:rgba(155,89,182,0.1);color:#7b4d9e;}
+.pb-wrap{background:var(--beige-dark);border-radius:10px;height:8px;overflow:hidden;}
+.pb-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--green),var(--green-light));transition:width 0.6s;}
+.badges-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.achievement-badge{display:flex;flex-direction:column;align-items:center;padding:12px 14px;border-radius:var(--radius);background:var(--white);border:1px solid var(--border);min-width:80px;text-align:center;box-shadow:var(--shadow);}
+.achievement-badge.earned{border-color:var(--gold);background:rgba(179,102,179,0.06);}
+.achievement-badge .badge-icon{font-size:24px;margin-bottom:5px;filter:grayscale(1);opacity:0.4;}
+.achievement-badge.earned .badge-icon{filter:none;opacity:1;}
+.achievement-badge .badge-name{font-size:10px;color:var(--text-muted);font-weight:600;}
+.achievement-badge.earned .badge-name{color:#733073;}
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal{background:var(--white);border-radius:var(--radius);max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);border-top:4px solid var(--gold);}
+.modal-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-header h3{font-size:16px;font-weight:700;color:var(--green-dark);}
+.modal-body{padding:20px 22px;}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;}
+.close-btn{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-muted);padding:4px;}
+.points-display{background:linear-gradient(135deg,var(--green-dark),var(--green));color:white;border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.points-display .pts-val{font-size:32px;font-weight:800;}
+.points-display .pts-label{font-size:12px;opacity:0.8;}
+.points-display .pts-icon{font-size:36px;}
+.mistake-tracker{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:10px;}
+.mistake-cat{border-radius:var(--radius);padding:14px;text-align:center;border:1px solid var(--border);}
+.mistake-cat .mc-icon{font-size:24px;display:block;margin-bottom:6px;}
+.mistake-cat .mc-count{font-size:22px;font-weight:800;display:block;}
+.mistake-cat .mc-label{font-size:11px;color:var(--text-muted);font-weight:600;}
+.mistake-cat.tajweed{background:rgba(150,100,200,0.06);border-color:rgba(150,100,200,0.2);}
+.mistake-cat.tajweed .mc-count{color:#6b3da1;}
+.mistake-cat.memorization{background:rgba(231,76,60,0.06);border-color:rgba(231,76,60,0.2);}
+.mistake-cat.memorization .mc-count{color:#c0392b;}
+.mistake-cat.pronunciation{background:rgba(155,89,182,0.06);border-color:rgba(155,89,182,0.2);}
+.mistake-cat.pronunciation .mc-count{color:#7b4d9e;}
+.top-student-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--beige-dark);}
+.top-student-row:last-child{border-bottom:none;}
+.rank-num{font-size:14px;font-weight:800;color:var(--gold);width:22px;text-align:center;}
+.rank-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;background:linear-gradient(135deg,var(--green),var(--green-light));flex-shrink:0;}
+.rank-info{flex:1;}
+.rank-name{font-size:13px;font-weight:700;}
+.rank-pts{font-size:11px;color:var(--text-muted);}
+.rank-pts span{color:var(--gold);font-weight:700;}
+.toast{position:fixed;bottom:24px;right:24px;z-index:2000;background:var(--green-dark);color:white;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.3);opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none;border-right:3px solid var(--gold);}
+.toast.show{opacity:1;transform:translateY(0);}
+.search-box{position:relative;flex:1;max-width:280px;}
+.search-box input{width:100%;padding:8px 12px 8px 36px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:13px;background:var(--beige);}
+.search-box input:focus{outline:none;border-color:var(--green);background:white;}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:14px;}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--beige-dark);margin-bottom:20px;}
+.tab-btn{padding:8px 16px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;background:none;border:none;cursor:pointer;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;}
+.tab-btn.active{color:var(--green);border-bottom-color:var(--green);}
+.divider{height:1px;background:var(--beige-dark);margin:16px 0;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.three-col{display:grid;grid-template-columns:2fr 1fr;gap:20px;}
+.attention-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--beige-dark);}
+.attention-row:last-child{border-bottom:none;}
+.attention-dot{width:8px;height:8px;border-radius:50%;background:#e74c3c;flex-shrink:0;}
+
+/* Teacher: manage student login credentials */
+.cred-box{background:var(--beige);border-radius:var(--radius-sm);padding:14px;margin-top:12px;border:1px solid var(--beige-dark);}
+.cred-box p{font-size:12px;color:var(--text-muted);margin-bottom:10px;}
+.cred-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.cred-row label{font-size:12px;font-weight:600;width:70px;flex-shrink:0;}
+.cred-row input{flex:1;padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Cairo',sans-serif;font-size:12px;background:white;direction:ltr;}
+.cred-row input:focus{outline:none;border-color:var(--green);}
+
+/* ── Circles (حلقات) ── */
+.circles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+.circle-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);padding:18px;box-shadow:var(--shadow);cursor:pointer;transition:all 0.2s;border-right:4px solid var(--green);}
+.circle-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(137,72,137,0.13);}
+.circle-card.color-1{border-right-color:#894889;}
+.circle-card.color-2{border-right-color:#B366B3;}
+.circle-card.color-3{border-right-color:#8a2be2;}
+.circle-card.color-4{border-right-color:#9b59b6;}
+.circle-card.color-5{border-right-color:#b340b3;}
+.circle-icon{font-size:28px;margin-bottom:8px;}
+.circle-name{font-size:15px;font-weight:800;color:var(--green-dark);margin-bottom:4px;}
+.circle-meta{font-size:12px;color:var(--text-muted);}
+.circle-stats{display:flex;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--beige-dark);}
+.circle-stat{font-size:11px;text-align:center;}
+.circle-stat .cv{font-size:16px;font-weight:800;color:var(--green);display:block;}
+.circle-stat .cl{color:var(--text-muted);}
+.circle-header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--green);cursor:pointer;font-weight:600;background:none;border:1.5px solid var(--green);padding:5px 12px;border-radius:var(--radius-sm);}
+.back-btn:hover{background:var(--green);color:white;}
+.circle-badge-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:14px;}
+.empty-state{text-align:center;padding:50px 20px;color:var(--text-muted);}
+.empty-state .ei{font-size:50px;display:block;margin-bottom:12px;opacity:0.4;}
+@media(max-width:700px){
+  .sidebar{width:60px;min-width:60px;}
+  .sidebar-logo h1,.sidebar-logo p,.nav-item span:not(.nav-icon),.user-info{display:none;}
+  .nav-item{justify-content:center;}
+  .form-grid{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .mistake-tracker{grid-template-columns:1fr;}
+  .content{padding:14px;}
+  .two-col,.three-col{grid-template-columns:1fr;}
+  .portal-grid{grid-template-columns:1fr 1fr;}
+  .portal-hero{flex-direction:column;text-align:center;}
+}
+@media(max-width:480px){
+  .students-grid{grid-template-columns:1fr;}
+  .portal-grid{grid-template-columns:1fr 1fr;}
+  .role-cards{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ ROLE PICKER ══ -->
+<div id="role-screen" class="full-screen bg-dark">
+  <div class="role-box">
+    <span class="crescent">☽</span>
+    <h2>أُنس</h2>
+    <p>اختر نوع الدخول</p>
+    <div id="fb-load-err" style="display:none;background:#fff3f3;border:1px solid #ffb3b3;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#c0392b;text-align:right;line-height:1.8">
+      ⚠️ <strong>تعذّر الاتصال بـ Firebase.</strong><br>
+      تأكد من:<br>
+      ١. اتصالك بالإنترنت<br>
+      ٢. أنك فعّلت <strong>Email/Password</strong> في Authentication<br>
+      <span style="cursor:pointer;color:var(--green);font-weight:700" onclick="document.getElementById('fb-load-err').style.display='none'; retryFirebaseLoad()">← حاول مرة أخرى</span>
+    </div>
+    <div class="role-cards">
+      <div class="role-card" onclick="chooseRole('teacher')">
+        <span class="r-icon">👨‍🏫</span>
+        <div class="r-title">المعلم</div>
+        <div class="r-desc">إدارة الطلاب والجلسات والتقييمات</div>
+      </div>
+      <div class="role-card" onclick="chooseRole('student')">
+        <span class="r-icon">🎓</span>
+        <div class="r-title">الطالب</div>
+        <div class="r-desc">عرض تقييماتي وتقدمي في الحفظ</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEACHER AUTH ══ -->
+<div id="teacher-auth" class="full-screen bg-dark hidden">
+  <div class="auth-box">
+    <span class="crescent">☽</span>
+    <h2>أُنس</h2>
+    <span class="auth-role-tag teacher">👨‍🏫 دخول المعلم</span>
+    <div id="t-auth-err" class="auth-err"></div>
+    <input class="auth-input" id="t-email"    type="email"    placeholder="البريد الإلكتروني">
+    <input class="auth-input" id="t-password" type="password" placeholder="كلمة المرور">
+    <button class="auth-btn" onclick="teacherLogin()">تسجيل الدخول</button>
+    <button class="auth-btn secondary" onclick="teacherRegister()">إنشاء حساب جديد</button>
+    <span class="auth-back" onclick="backToRoles()">← العودة لاختيار نوع الدخول</span>
+  </div>
+</div>
+
+<!-- ══ STUDENT AUTH ══ -->
+<div id="student-auth" class="full-screen bg-dark hidden">
+  <div class="auth-box">
+    <span class="crescent">☽</span>
+    <h2>أُنس</h2>
+    <span class="auth-role-tag student">🎓 دخول الطالب</span>
+    <p class="sub">ادخل باستخدام البريد وكلمة المرور التي أعطاكها المعلم</p>
+    <div id="s-auth-err" class="auth-err"></div>
+    <input class="auth-input" id="s-email"    type="email"    placeholder="البريد الإلكتروني">
+    <input class="auth-input" id="s-password" type="password" placeholder="كلمة المرور">
+    <button class="auth-btn gold" onclick="studentLogin()">دخول البوابة</button>
+    <span class="auth-back" onclick="backToRoles()">← العودة لاختيار نوع الدخول</span>
+  </div>
+</div>
+
+<!-- ══ LOADING ══ -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <p style="color:var(--green-dark);font-weight:600;font-size:14px">جارٍ التحميل...</p>
+</div>
+
+<!-- ══ TEACHER APP ══ -->
+<div id="app" style="display:none"></div>
+
+<!-- ══ STUDENT PORTAL ══ -->
+<div id="student-portal"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   FIREBASE CONFIGURATION
+═══════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAUw7jAdS7nmbF5phaF310FiuAxQiRo8G0",
+  authDomain: "onsacademy-f61e9.firebaseapp.com",
+  projectId: "onsacademy-f61e9",
+  storageBucket: "onsacademy-f61e9.firebasestorage.app",
+  messagingSenderId: "260742964651",
+  appId: "1:260742964651:web:db2520b248eeb8b3311eee",
+  measurementId: "G-4J66WXGSJM"
+};
+
+/* ═══════════════════════════════════════════════
+   CONSTANTS & HELPERS
+═══════════════════════════════════════════════ */
+const SURAHS=['الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه','الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم','لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر','فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق','الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة','الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس','التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'];
+const BADGES_DEF=[
+  {id:'hafiz',  icon:'🏆',name:'حافظ متميز',   cond:s=>avgRating(s)>=4.5},
+  {id:'consist',icon:'⭐',name:'طالب منتظم',   cond:s=>s.sessions.length>=10},
+  {id:'tajweed',icon:'📖',name:'متقن التجويد',  cond:s=>avgTajweed(s)>=4},
+  {id:'clean',  icon:'✨',name:'بلا أخطاء',    cond:s=>totalMistakes(s)===0},
+  {id:'star',   icon:'🌟',name:'نجم الحلقة',   cond:s=>calcPoints(s)>=300},
+  {id:'adv',    icon:'🎯',name:'متقدم',        cond:s=>s.level==='متقدم'},
+];
+
+let db,auth,currentUser,currentRole;
+
+function avgRating(s){if(!s.sessions.length)return 0;return s.sessions.reduce((a,b)=>a+((b.memRating+b.tajweedRating+b.commitRating)/3),0)/s.sessions.length;}
+function avgTajweed(s){if(!s.sessions.length)return 0;return s.sessions.reduce((a,b)=>a+b.tajweedRating,0)/s.sessions.length;}
+function totalMistakes(s){return s.sessions.reduce((a,b)=>a+(b.mistakes||[]).length,0);}
+function calcPoints(s){let p=0;s.sessions.forEach(ss=>{p+=(ss.memRating+ss.tajweedRating+ss.commitRating)*10;if(ss.memRating>=4&&ss.tajweedRating>=4)p+=20;});return p;}
+function starsHtml(n){return'★'.repeat(Math.round(n))+'☆'.repeat(5-Math.round(n));}
+function initials(name){return name?name.trim()[0]:'؟';}
+function formatDate(d){if(!d)return'';return new Date(d).toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'});}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function show(id){document.getElementById(id).classList.remove('hidden');}
+function hide(id){document.getElementById(id).classList.add('hidden');}
+function loading(on){document.getElementById('loading-screen').style.display=on?'flex':'none';}
+
+/* ═══════════════════════════════════════════════
+   ROLE PICKER
+═══════════════════════════════════════════════ */
+window.chooseRole=function(role){
+  hide('role-screen');
+  if(role==='teacher') show('teacher-auth');
+  else show('student-auth');
+};
+window.backToRoles=function(){
+  hide('teacher-auth'); hide('student-auth');
+  show('role-screen');
+};
+
+/* ═══════════════════════════════════════════════
+   FIREBASE INIT
+═══════════════════════════════════════════════ */
+function loadFirebase(cfg){
+  hide('role-screen'); hide('teacher-auth'); hide('student-auth');
+  loading(true);
+
+  const timeoutId = setTimeout(()=>{
+    if(!auth){
+      loading(false);
+      show('role-screen');
+      document.getElementById('fb-load-err').style.display='block';
+    }
+  }, 8000);
+
+  const sdks=[
+    'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
+    'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js',
+  ];
+  let loaded=0;
+  sdks.forEach(src=>{
+    const s=document.createElement('script');
+    s.src=src;
+    s.onload=()=>{if(++loaded===sdks.length){ clearTimeout(timeoutId); initFirebase(cfg); }};
+    s.onerror=()=>{loading(false);show('role-screen');alert('فشل تحميل Firebase. تحقق من اتصالك.');};
+    document.head.appendChild(s);
+  });
+}
+
+function initFirebase(cfg){
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(cfg);
+    db=firebase.firestore();
+    auth=firebase.auth();
+    loading(false);
+    document.getElementById('fb-load-err').style.display='none';
+    show('role-screen');
+    auth.onAuthStateChanged(async user=>{
+      if(user){
+        currentUser=user;
+        const snap=await db.collection('users').doc(user.uid).get();
+        const data=snap.exists?snap.data():{};
+        if(data.role==='student'){
+          const sData=await getStudentDataByUid(user.uid);
+          if(sData){ hide('role-screen'); startStudentPortal(sData); }
+        } else {
+          hide('role-screen'); hide('teacher-auth');
+          startTeacherApp();
+        }
+      }
+    });
+  }catch(e){
+    loading(false);
+    document.getElementById('fb-load-err').style.display='block';
+    show('role-screen');
+  }
+}
+
+window.addEventListener('load',()=>{
+  loadFirebase(firebaseConfig);
+});
+
+window.retryFirebaseLoad=function(){
+  loadFirebase(firebaseConfig);
+};
+
+/* ═══════════════════════════════════════════════
+   TEACHER AUTH
+═══════════════════════════════════════════════ */
+window.teacherLogin=async function(){
+  const email=document.getElementById('t-email').value.trim();
+  const pass=document.getElementById('t-password').value;
+  document.getElementById('t-auth-err').textContent='';
+  if(!auth){document.getElementById('t-auth-err').innerHTML='⏳ Firebase لم يتحمل بعد. <span style="cursor:pointer;color:var(--green);text-decoration:underline" onclick="retryFirebaseLoad()">اضغط هنا للمحاولة مجدداً</span>';return;}
+  try{
+    await auth.signInWithEmailAndPassword(email,pass);
+    await db.collection('users').doc(auth.currentUser.uid).set({role:'teacher',email},{merge:true});
+    hide('teacher-auth'); startTeacherApp();
+  }catch(e){
+    const msgs={'auth/user-not-found':'البريد غير مسجل','auth/wrong-password':'كلمة المرور خاطئة','auth/invalid-email':'بريد إلكتروني غير صالح','auth/invalid-credential':'بيانات الدخول خاطئة'};
+    document.getElementById('t-auth-err').textContent=msgs[e.code]||e.message;
+  }
+};
+window.teacherRegister=async function(){
+  const email=document.getElementById('t-email').value.trim();
+  const pass=document.getElementById('t-password').value;
+  document.getElementById('t-auth-err').textContent='';
+  if(!auth){document.getElementById('t-auth-err').innerHTML='⏳ Firebase لم يتحمل بعد. <span style="cursor:pointer;color:var(--green);text-decoration:underline" onclick="retryFirebaseLoad()">اضغط هنا للمحاولة مجدداً</span>';return;}
+  if(pass.length<6){document.getElementById('t-auth-err').textContent='كلمة المرور يجب أن تكون 6 أحرف على الأقل';return;}
+  try{
+    const cred=await auth.createUserWithEmailAndPassword(email,pass);
+    await db.collection('users').doc(cred.user.uid).set({role:'teacher',email});
+    hide('teacher-auth'); startTeacherApp();
+  }catch(e){
+    const msgs={'auth/email-already-in-use':'البريد مستخدم بالفعل','auth/invalid-email':'بريد إلكتروني غير صالح','auth/weak-password':'كلمة المرور ضعيفة'};
+    document.getElementById('t-auth-err').textContent=msgs[e.code]||e.message;
+  }
+};
+
+/* ═══════════════════════════════════════════════
+   STUDENT AUTH
+═══════════════════════════════════════════════ */
+window.studentLogin=async function(){
+  const email=document.getElementById('s-email').value.trim();
+  const pass=document.getElementById('s-password').value;
+  document.getElementById('s-auth-err').textContent='';
+  if(!auth){document.getElementById('s-auth-err').innerHTML='⏳ Firebase لم يتحمل بعد. <span style="cursor:pointer;color:var(--green);text-decoration:underline" onclick="retryFirebaseLoad()">اضغط هنا للمحاولة مجدداً</span>';return;}
+  try{
+    const cred=await auth.signInWithEmailAndPassword(email,pass);
+    localStorage.setItem('student_email',email);
+    localStorage.setItem('student_logged','1');
+    const sData=await getStudentDataByUid(cred.user.uid);
+    if(!sData){
+      await auth.signOut();
+      document.getElementById('s-auth-err').textContent='هذا الحساب غير مرتبط بأي طالب. تواصل مع معلمك.';
+      return;
+    }
+    hide('student-auth');
+    startStudentPortal(sData);
+  }catch(e){
+    const msgs={'auth/user-not-found':'البريد غير مسجل','auth/wrong-password':'كلمة المرور خاطئة','auth/invalid-email':'بريد غير صالح','auth/invalid-credential':'بيانات الدخول خاطئة'};
+    document.getElementById('s-auth-err').textContent=msgs[e.code]||e.message;
+  }
+};
+
+async function getStudentDataByUid(uid){
+  const teachersSnap=await db.collection('users').where('role','==','teacher').get();
+  for(const teacherDoc of teachersSnap.docs){
+    const sSnap=await db.collection('users').doc(teacherDoc.id).collection('students').where('studentUid','==',uid).get();
+    if(!sSnap.empty){
+      const sDoc=sSnap.docs[0];
+      const student={id:sDoc.id,teacherId:teacherDoc.id,...sDoc.data(),sessions:[]};
+      const ssSnap=await db.collection('users').doc(teacherDoc.id).collection('students').doc(sDoc.id).collection('sessions').orderBy('date','asc').get();
+      ssSnap.forEach(sd=>student.sessions.push({id:sd.id,...sd.data()}));
+      return student;
+    }
+  }
+  return null;
+}
+
+/* ═══════════════════════════════════════════════
+   STUDENT PORTAL
+═══════════════════════════════════════════════ */
+function startStudentPortal(student){
+  currentRole='student';
+  document.getElementById('app').style.display='none';
+  const portal=document.getElementById('student-portal');
+  portal.style.display='block';
+  renderStudentPortal(student);
+}
+
+function renderStudentPortal(s){
+  const pts=calcPoints(s),avg=avgRating(s);
+  const mc={'تجويد':0,'حفظ':0,'نطق':0};
+  s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{if(mc[m]!==undefined)mc[m]++;}));
+  const levelPct=Math.min(100,Math.round(pts/5));
+
+  const badgesHtml=BADGES_DEF.map(b=>{
+    const earned=b.cond({...s,points:pts});
+    return`<div class="p-badge ${earned?'earned':''}">
+      <div class="pb-icon">${b.icon}</div>
+      <div class="pb-name">${b.name}</div>
+    </div>`;
+  }).join('');
+
+  const sessionsHtml=s.sessions.length===0
+    ?`<div class="portal-empty"><span class="empty-icon">📖</span>لا توجد جلسات مسجلة بعد</div>`
+    :[...s.sessions].reverse().map(ss=>`
+      <div class="portal-session">
+        <div class="portal-session-header">
+          <div>
+            <div class="surah-name">سورة ${ss.surah}</div>
+            <div class="ayahs">الآيات ${ss.fromAyah} – ${ss.toAyah}</div>
+          </div>
+          <div class="s-date">${formatDate(ss.date)}</div>
+        </div>
+        <div class="rating-row">
+          <div class="rating-pill mem">📖 حفظ: ${ss.memRating}/5 <span class="stars-sm">${starsHtml(ss.memRating)}</span></div>
+          <div class="rating-pill taj">🎵 تجويد: ${ss.tajweedRating}/5 <span class="stars-sm">${starsHtml(ss.tajweedRating)}</span></div>
+          <div class="rating-pill com">✅ التزام: ${ss.commitRating}/5 <span class="stars-sm">${starsHtml(ss.commitRating)}</span></div>
+        </div>
+        ${(ss.mistakes||[]).length>0?`<div class="portal-mistake-tags">${ss.mistakes.map(m=>`<span class="portal-mistake-tag ${m==='تجويد'?'tajweed':m==='نطق'?'pronunciation':''}">${m}</span>`).join('')}</div>`:''}
+        ${ss.summary?`<div class="portal-summary">💬 ${ss.summary}</div>`:''}
+        
+      </div>`).join('');
+
+  document.getElementById('student-portal').innerHTML=`
+    <div class="portal-header">
+      <div style="display:flex;align-items:center">
+        <span class="crescent">☽</span>
+        <h1>بوابة الطالب — أُنس</h1>
+      </div>
+      <button class="portal-logout" onclick="studentLogout()">تسجيل الخروج</button>
+    </div>
+    <div class="portal-content">
+      <div class="portal-hero">
+        <div class="portal-avatar">${initials(s.name)}</div>
+        <div style="flex:1">
+          <h2>${s.name}</h2>
+          <p>${s.level} · بدأ في ${formatDate(s.startDate)}</p>
+          <div class="portal-pts">${pts} <span>نقطة</span></div>
+        </div>
+      </div>
+      <div class="portal-grid" style="margin-bottom:20px">
+        <div class="portal-stat">
+          <span class="ps-icon">📅</span>
+          <div class="ps-val">${s.sessions.length}</div>
+          <div class="ps-label">جلسة مكتملة</div>
+        </div>
+        <div class="portal-stat">
+          <span class="ps-icon">⭐</span>
+          <div class="ps-val">${avg.toFixed(1)}</div>
+          <div class="ps-label">متوسط التقييم</div>
+        </div>
+        <div class="portal-stat">
+          <span class="ps-icon">⚠️</span>
+          <div class="ps-val">${totalMistakes(s)}</div>
+          <div class="ps-label">إجمالي الأخطاء</div>
+        </div>
+      </div>
+      <div class="portal-progress">
+        <div class="portal-section-title">📈 مستوى التقدم</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width:${levelPct}%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--text-muted)">
+          <span>المستوى الحالي: <strong style="color:var(--green)">${levelPct}%</strong></span>
+          <span>الهدف: ${pts >= 500?'🏆 محقق!':'500 نقطة'}</span>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="portal-section-title">📊 ملخص الأخطاء</div>
+        <div class="mistake-tracker">
+          <div class="mistake-cat tajweed"><span class="mc-icon">📖</span><span class="mc-count">${mc['تجويد']}</span><span class="mc-label">تجويد</span></div>
+          <div class="mistake-cat memorization"><span class="mc-icon">🧠</span><span class="mc-count">${mc['حفظ']}</span><span class="mc-label">حفظ</span></div>
+          <div class="mistake-cat pronunciation"><span class="mc-icon">🗣️</span><span class="mc-count">${mc['نطق']}</span><span class="mc-label">نطق</span></div>
+        </div>
+      </div>
+      <div style="margin-bottom:20px">
+        <div class="portal-section-title">🏆 الشارات والإنجازات</div>
+        <div class="portal-badges">${badgesHtml}</div>
+      </div>
+      <div>
+        <div class="portal-section-title">📋 سجل الجلسات</div>
+        ${sessionsHtml}
+      </div>
+    </div>`;
+}
+
+window.studentLogout=async function(){
+  await auth.signOut();
+  document.getElementById('student-portal').style.display='none';
+  document.getElementById('student-portal').innerHTML='';
+  show('role-screen');
+};
+
+/* ═══════════════════════════════════════════════
+   TEACHER APP — Firestore helpers
+═══════════════════════════════════════════════ */
+function col(path){return db.collection('users').doc(currentUser.uid).collection(path);}
+
+async function loadStudents(){
+  const snap=await col('students').orderBy('createdAt','asc').get();
+  const students=[];
+  for(const doc of snap.docs){
+    const s={id:doc.id,...doc.data(),sessions:[]};
+    const ssSnap=await col('students').doc(doc.id).collection('sessions').orderBy('date','asc').get();
+    ssSnap.forEach(sd=>s.sessions.push({id:sd.id,...sd.data()}));
+    students.push(s);
+  }
+  return students;
+}
+
+async function fbAddStudent(data){
+  const ref=await col('students').add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  return ref.id;
+}
+
+async function fbAddSession(studentId,data){
+  const ref=await col('students').doc(studentId).collection('sessions').add(data);
+  return ref.id;
+}
+
+async function loadCircles(){
+  const snap=await col('circles').orderBy('createdAt','asc').get();
+  return snap.docs.map(d=>({id:d.id,...d.data()}));
+}
+
+async function fbAddCircle(data){
+  const ref=await col('circles').add({...data,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  return ref.id;
+}
+
+async function fbDeleteCircle(id){
+  const snap=await col('students').where('circleId','==',id).get();
+  const batch=db.batch();
+  snap.forEach(d=>batch.update(d.ref,{circleId:'',circleName:''}));
+  batch.delete(col('circles').doc(id));
+  await batch.commit();
+}
+
+/* ═══════════════════════════════════════════════
+   TEACHER APP STATE & START
+═══════════════════════════════════════════════ */
+let state={
+  page:'dashboard',students:[],circles:[],
+  selectedStudent:null,selectedCircle:null,
+  modal:null,search:'',
+  tab:'sessions',form:{},circleForm:{},
+  sessionForm:{stars:{mem:0,tajweed:0,commit:0},mistakes:[]},
+};
+
+async function startTeacherApp(){
+  currentRole='teacher';
+  currentUser=auth.currentUser;
+  loading(true);
+  [state.students, state.circles]=await Promise.all([loadStudents(), loadCircles()]);
+  loading(false);
+  document.getElementById('app').style.display='flex';
+  render();
+}
+
+window.doLogout=async function(){
+  await auth.signOut();
+  state.students=[];
+  document.getElementById('app').style.display='none';
+  show('role-screen');
+};
+
+/* ═══════════════════════════════════════════════
+   TEACHER RENDER FUNCTIONS
+═══════════════════════════════════════════════ */
+function weekSessions(){const w=new Date(Date.now()-7*24*60*60*1000);let c=0;state.students.forEach(s=>s.sessions.forEach(ss=>{if(new Date(ss.date)>=w)c++;}));return c;}
+function topStudents(){return state.students.filter(s=>s.sessions.length>0).map(s=>({...s,points:calcPoints(s),avg:avgRating(s)})).sort((a,b)=>b.points-a.points).slice(0,5);}
+function attentionStudents(){return state.students.filter(s=>{if(!s.sessions.length)return true;const l=s.sessions[s.sessions.length-1];return l.memRating<=2||l.tajweedRating<=2;});}
+function allMistakes(){const c={'تجويد':0,'حفظ':0,'نطق':0};state.students.forEach(s=>s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{if(c[m]!==undefined)c[m]++;})));return c;}
+
+/* ═══════════════════════════════════════════════
+   CIRCLES RENDER
+═══════════════════════════════════════════════ */
+const CIRCLE_COLORS=['color-1','color-2','color-3','color-4','color-5'];
+const CIRCLE_ICONS=['🕌','📖','⭐','🌙','🎯','🏅','✨','🌟'];
+
+function renderCircles(){
+  const circles=state.circles;
+  return`
+  <div class="circle-header-bar">
+    <div style="font-size:13px;color:var(--text-muted)">${circles.length} حلقة مسجلة</div>
+    <button class="btn btn-primary" onclick="openAddCircle()">+ إضافة حلقة</button>
+  </div>
+  ${circles.length===0?`
+    <div class="empty-state">
+      <span class="ei">🕌</span>
+      <div style="font-size:15px;font-weight:700;margin-bottom:8px">لا توجد حلقات بعد</div>
+      <div style="font-size:13px">أضف حلقتك الأولى لتنظيم طلابك</div>
+    </div>`:
+  `<div class="circles-grid">
+    ${circles.map((circle,i)=>{
+      const students=state.students.filter(s=>s.circleId===circle.id);
+      const avgPts=students.length?Math.round(students.reduce((a,s)=>a+calcPoints(s),0)/students.length):0;
+      const colorClass=CIRCLE_COLORS[i%CIRCLE_COLORS.length];
+      return`<div class="circle-card ${colorClass}" onclick="viewCircle('${circle.id}')">
+        <div class="circle-icon">${circle.icon||'🕌'}</div>
+        <div class="circle-name">${circle.name}</div>
+        <div class="circle-meta">${circle.description||'لا يوجد وصف'}</div>
+        <div class="circle-stats">
+          <div class="circle-stat"><span class="cv">${students.length}</span><span class="cl">طالب</span></div>
+          <div class="circle-stat"><span class="cv">${avgPts}</span><span class="cl">متوسط النقاط</span></div>
+          <div class="circle-stat"><span class="cv">${students.filter(s=>s.sessions&&s.sessions.length>0).length}</span><span class="cl">نشط</span></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px" onclick="event.stopPropagation()">
+          <button class="btn btn-outline btn-sm" onclick="viewCircle('${circle.id}')">عرض الطلاب</button>
+          <button class="btn btn-sm" style="background:#fff0f0;color:#c0392b;border:1px solid #ffcccc" onclick="deleteCircle('${circle.id}','${circle.name}')">حذف</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`}`;
+}
+
+function renderCircleDetail(circleId){
+  const circle=state.circles.find(x=>x.id===circleId);
+  if(!circle)return'<p>الحلقة غير موجودة</p>';
+  const students=state.students.filter(s=>s.circleId===circleId);
+  const q=state.search.toLowerCase();
+  const filtered=students.filter(s=>!q||s.name.includes(q)||s.level.includes(q));
+  return`
+  <div class="circle-header-bar">
+    <button class="back-btn" onclick="navigate('circles')">← العودة للحلقات</button>
+    <button class="btn btn-primary" onclick="openAddStudentToCircle('${circleId}')">+ إضافة طالب للحلقة</button>
+  </div>
+  <div class="card card-gold" style="margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="font-size:40px">${circle.icon||'🕌'}</div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--green-dark)">${circle.name}</div>
+        <div style="font-size:13px;color:var(--text-muted)">${circle.description||''}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px">${students.length} طالب مسجل</div>
+      </div>
+    </div>
+  </div>
+  ${filtered.length===0?`<div class="empty-state"><span class="ei">👤</span><div>لا يوجد طلاب في هذه الحلقة بعد</div></div>`:`
+  <div class="students-grid">
+    ${filtered.map(s=>{
+      const pts=calcPoints(s),avg=avgRating(s);
+      return`<div class="student-card" onclick="viewStudent('${s.id}')">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div class="student-avatar">${s.name?s.name.trim()[0]:'؟'}</div>
+          <div><div class="student-name">${s.name}</div><div class="student-meta">${s.age} سنة · ${s.sessions.length} جلسة</div></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span class="badge badge-${s.level==='متقدم'?'gold':s.level==='متوسط'?'blue':'green'}">${s.level}</span>
+          <button class="btn btn-sm" style="background:#fff0f0;color:#c0392b;border:1px solid #ffcccc;font-size:11px" onclick="event.stopPropagation();removeFromCircle('${s.id}')">إزالة من الحلقة</button>
+        </div>
+        <div class="mini-stats" style="margin-top:12px">
+          <div class="mini-stat"><span class="val">${pts}</span><span class="lbl">نقطة</span></div>
+          <div class="mini-stat"><span class="val">${avg.toFixed(1)}</span><span class="lbl">معدل</span></div>
+        </div>
+        <div class="pb-wrap" style="margin-top:10px"><div class="pb-fill" style="width:${Math.min(100,pts/5)}%"></div></div>
+      </div>`;
+    }).join('')}
+  </div>`}`;
+}
+
+function renderAddCircleModal(){
+  const f=state.circleForm;
+  const icons=CIRCLE_ICONS;
+  return`<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-header"><h3>🕌 إضافة حلقة جديدة</h3><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group form-full"><label>اسم الحلقة *</label><input type="text" id="c-name" placeholder="مثال: حلقة الفجر" value="${f.name||''}"></div>
+          <div class="form-group form-full"><label>وصف الحلقة</label><input type="text" id="c-desc" placeholder="مثال: للطلاب المتقدمين — صباح الجمعة" value="${f.description||''}"></div>
+          <div class="form-group form-full">
+            <label>اختر أيقونة</label>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+              ${icons.map(ic=>`<button onclick="state.circleForm.icon='${ic}';render()" style="font-size:24px;padding:8px;border-radius:8px;border:2px solid ${f.icon===ic?'var(--green)':'var(--border)'};background:${f.icon===ic?'rgba(137,72,137,0.08)':'var(--beige)'};cursor:pointer">${ic}</button>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="saveCircle()">💾 حفظ الحلقة</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAddStudentToCircleModal(circleId){
+  const circle=state.circles.find(x=>x.id===circleId);
+  const unassigned=state.students.filter(s=>!s.circleId||s.circleId==='');
+  return`<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-header"><h3>➕ إضافة طالب إلى ${circle?circle.name:''}</h3><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <div class="modal-body">
+        ${unassigned.length===0?`<p style="color:var(--text-muted);font-size:13px">جميع الطلاب مضافون إلى حلقات بالفعل.<br>يمكنك إزالة طالب من حلقته أولاً.</p>`:`
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">اختر الطلاب الذين تريد إضافتهم لهذه الحلقة:</p>
+        <div id="students-to-add">
+          ${unassigned.map(s=>`
+            <label style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;cursor:pointer;background:var(--beige)">
+              <input type="checkbox" value="${s.id}" style="width:16px;height:16px;accent-color:var(--green)">
+              <div class="rank-avatar" style="width:32px;height:32px;font-size:12px">${s.name?s.name.trim()[0]:'؟'}</div>
+              <div><div style="font-size:13px;font-weight:700">${s.name}</div><div style="font-size:11px;color:var(--text-muted)">${s.level}</div></div>
+            </label>`).join('')}
+        </div>`}
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+        ${unassigned.length>0?`<button class="btn btn-primary" onclick="addStudentsToCircle('${circleId}')">✅ إضافة المحددين</button>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDashboard(){
+  const mc=allMistakes(),top=topStudents(),att=attentionStudents();
+  return`
+  <div class="stats-grid">
+    <div class="stat-card"><span class="stat-icon">👤</span><div class="stat-val">${state.students.length}</div><div class="stat-label">إجمالي الطلاب</div></div>
+    <div class="stat-card gold"><span class="stat-icon">📅</span><div class="stat-val">${weekSessions()}</div><div class="stat-label">جلسات هذا الأسبوع</div></div>
+    <div class="stat-card"><span class="stat-icon">⭐</span><div class="stat-val">${state.students.filter(s=>avgRating(s)>=4).length}</div><div class="stat-label">الطلاب المتميزون</div></div>
+    <div class="stat-card"><span class="stat-icon">⚠️</span><div class="stat-val">${att.length}</div><div class="stat-label">يحتاجون اهتماماً</div></div>
+    <div class="stat-card gold" style="cursor:pointer" onclick="navigate('circles')"><span class="stat-icon">🕌</span><div class="stat-val">${state.circles.length}</div><div class="stat-label">الحلقات</div></div>
+  </div>
+  <div class="three-col">
+    <div>
+      <div class="card card-gold" style="margin-bottom:20px">
+        <div class="section-title"><span>📊</span>الأخطاء الشائعة</div>
+        <div class="mistake-tracker">
+          <div class="mistake-cat tajweed"><span class="mc-icon">📖</span><span class="mc-count">${mc['تجويد']}</span><span class="mc-label">تجويد</span></div>
+          <div class="mistake-cat memorization"><span class="mc-icon">🧠</span><span class="mc-count">${mc['حفظ']}</span><span class="mc-label">حفظ</span></div>
+          <div class="mistake-cat pronunciation"><span class="mc-icon">🗣️</span><span class="mc-count">${mc['نطق']}</span><span class="mc-label">نطق</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title"><span>⚠️</span>يحتاجون اهتماماً</div>
+        ${att.length===0?'<p style="color:var(--text-muted);font-size:13px">جميع الطلاب بوضع جيد 🎉</p>':att.map(s=>`
+          <div class="attention-row">
+            <div class="attention-dot"></div>
+            <div class="rank-avatar">${initials(s.name)}</div>
+            <div class="rank-info"><div class="rank-name">${s.name}</div><div class="rank-pts">${s.sessions.length?'تدني في آخر جلسة':'لا توجد جلسات'}</div></div>
+            <button class="btn btn-sm btn-outline" onclick="viewStudent('${s.id}')">عرض</button>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title"><span>🏆</span>أفضل الطلاب</div>
+      ${top.length===0?'<p style="color:var(--text-muted);font-size:13px">لا توجد جلسات بعد</p>':top.map((s,i)=>`
+        <div class="top-student-row">
+          <div class="rank-num">${['🥇','🥈','🥉','4','5'][i]}</div>
+          <div class="rank-avatar">${initials(s.name)}</div>
+          <div class="rank-info"><div class="rank-name">${s.name}</div><div class="rank-pts">النقاط: <span>${s.points}</span></div></div>
+          <div class="stars">${starsHtml(s.avg)}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderStudents(){
+  const q=state.search.toLowerCase();
+  const filtered=state.students.filter(s=>!q||s.name.includes(q)||s.level.includes(q));
+  return`<div class="students-grid">
+    ${filtered.map(s=>{
+      const pts=calcPoints(s),avg=avgRating(s);
+      return`<div class="student-card" onclick="viewStudent('${s.id}')">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div class="student-avatar">${initials(s.name)}</div>
+          <div><div class="student-name">${s.name}</div><div class="student-meta">${s.age} سنة · ${s.sessions.length} جلسة</div></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px">
+          <span class="badge badge-${s.level==='متقدم'?'gold':s.level==='متوسط'?'blue':'green'}">${s.level}</span>
+          ${s.circleName?`<span style="font-size:10px;color:var(--green);background:rgba(137,72,137,0.08);padding:2px 7px;border-radius:10px;font-weight:600">🕌 ${s.circleName}</span>`:''}
+          ${s.studentEmail?`<span style="font-size:10px;color:var(--text-muted)">🔗 لديه حساب</span>`:`<span style="font-size:10px;color:#e74c3c">⚠️ لا يوجد حساب</span>`}
+        </div>
+        <div class="mini-stats" style="margin-top:12px">
+          <div class="mini-stat"><span class="val">${pts}</span><span class="lbl">نقطة</span></div>
+          <div class="mini-stat"><span class="val">${avg.toFixed(1)}</span><span class="lbl">معدل</span></div>
+          <div class="mini-stat"><span class="val">${totalMistakes(s)}</span><span class="lbl">خطأ</span></div>
+        </div>
+        <div class="pb-wrap" style="margin-top:12px"><div class="pb-fill" style="width:${Math.min(100,pts/5)}%"></div></div>
+      </div>`;
+    }).join('')}
+    ${filtered.length===0?'<div style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:40px">لا توجد نتائج</div>':''}
+  </div>`;
+}
+
+function renderStudentProfile(s){
+  const pts=calcPoints(s),avg=avgRating(s);
+  const mc={'تجويد':0,'حفظ':0,'نطق':0};
+  s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{if(mc[m]!==undefined)mc[m]++;}));
+  const tabContent=state.tab==='sessions'
+    ?(s.sessions.length===0?'<p style="color:var(--text-muted);font-size:13px;padding:20px 0">لا توجد جلسات بعد.</p>'
+      :[...s.sessions].reverse().map(ss=>`
+        <div class="session-card">
+          <div class="session-header">
+            <div><div class="session-surah">سورة ${ss.surah}</div><div style="font-size:12px;color:var(--text-muted)">الآيات ${ss.fromAyah}–${ss.toAyah}</div></div>
+            <div style="font-size:12px;color:var(--text-muted)">${formatDate(ss.date)}</div>
+          </div>
+          <div class="session-ratings">
+            <div class="session-rating-item"><span class="r-label">حفظ: </span><span class="r-val">${ss.memRating}/5</span><span class="stars" style="font-size:11px">${starsHtml(ss.memRating)}</span></div>
+            <div class="session-rating-item"><span class="r-label">تجويد: </span><span class="r-val">${ss.tajweedRating}/5</span></div>
+            <div class="session-rating-item"><span class="r-label">التزام: </span><span class="r-val">${ss.commitRating}/5</span></div>
+          </div>
+          ${(ss.mistakes||[]).length>0?`<div class="mistake-tags">${ss.mistakes.map(m=>`<span class="mistake-tag ${m==='تجويد'?'tajweed':m==='نطق'?'pronunciation':''}">${m}</span>`).join('')}</div>`:''}
+          ${ss.summary?`<div style="font-size:12px;color:var(--text-muted);margin-top:8px">📝 ${ss.summary}</div>`:''}
+        </div>`).join(''))
+    :`<div class="mistake-tracker">
+        <div class="mistake-cat tajweed"><span class="mc-icon">📖</span><span class="mc-count">${mc['تجويد']}</span><span class="mc-label">تجويد</span></div>
+        <div class="mistake-cat memorization"><span class="mc-icon">🧠</span><span class="mc-count">${mc['حفظ']}</span><span class="mc-label">حفظ</span></div>
+        <div class="mistake-cat pronunciation"><span class="mc-icon">🗣️</span><span class="mc-count">${mc['نطق']}</span><span class="mc-label">نطق</span></div>
+      </div>`;
+
+  const accountSection=`
+    <div class="card" style="margin-top:20px">
+      <div class="section-title"><span>🔐</span>حساب الطالب</div>
+      ${s.studentEmail
+        ?`<div style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(137,72,137,0.06);border-radius:var(--radius-sm);border:1px solid rgba(137,72,137,0.15)">
+            <span style="font-size:20px">✅</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--green)">الطالب لديه حساب نشط</div>
+              <div style="font-size:12px;color:var(--text-muted)">البريد: <strong>${s.studentEmail}</strong></div>
+            </div>
+          </div>`
+        :`<div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">أنشئ حساباً للطالب حتى يتمكن من تسجيل الدخول ورؤية تقييماته.</p>
+            <div class="cred-box">
+              <p>⚠️ تأكد من حفظ بيانات الدخول وإعطائها للطالب</p>
+              <div class="cred-row"><label>البريد:</label><input type="email" id="cred-email" placeholder="student@example.com" dir="ltr"></div>
+              <div class="cred-row"><label>كلمة السر:</label><input type="password" id="cred-pass" placeholder="6 أحرف على الأقل"></div>
+              <div style="display:flex;gap:8px;margin-top:4px">
+                <button class="btn btn-primary btn-sm" onclick="createAccountForStudent('${s.id}')">🔐 إنشاء الحساب</button>
+                <span id="cred-status-${s.id}" style="font-size:12px;color:var(--text-muted);align-self:center"></span>
+              </div>
+            </div>
+          </div>`}
+    </div>`;
+
+  return`
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+    <button class="btn btn-outline btn-sm" onclick="navigate('students')">← العودة</button>
+    <h2 style="font-size:16px;font-weight:700;color:var(--green-dark)">${s.name}</h2>
+  </div>
+  <div class="two-col" style="margin-bottom:20px">
+    <div>
+      <div class="points-display">
+        <div><div class="pts-val">${pts}</div><div class="pts-label">إجمالي النقاط</div></div>
+        <div class="pts-icon">🏅</div>
+      </div>
+      <div class="card">
+        <div class="section-title"><span>👤</span>بيانات الطالب</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+          <div><span style="color:var(--text-muted)">الاسم:</span> <strong>${s.name}</strong></div>
+          <div><span style="color:var(--text-muted)">العمر:</span> <strong>${s.age} سنة</strong></div>
+          <div><span style="color:var(--text-muted)">المستوى:</span> <strong>${s.level}</strong></div>
+          <div><span style="color:var(--text-muted)">الحلقة:</span> <strong>${s.circleName||'—'}</strong></div>
+          <div><span style="color:var(--text-muted)">ولي الأمر:</span> <strong>${s.parent||'—'}</strong></div>
+          <div style="grid-column:1/-1"><span style="color:var(--text-muted)">تاريخ البدء:</span> <strong>${formatDate(s.startDate)}</strong></div>
+          ${s.notes?`<div style="grid-column:1/-1"><span style="color:var(--text-muted)">ملاحظات:</span> <strong>${s.notes}</strong></div>`:''}
+        </div>
+      </div>
+      ${accountSection}
+    </div>
+    <div class="card">
+      <div class="section-title"><span>🏆</span>الشارات والإنجازات</div>
+      <div class="badges-row">
+        ${BADGES_DEF.map(b=>{const e=b.cond({...s,points:pts});return`<div class="achievement-badge ${e?'earned':''}"><div class="badge-icon">${b.icon}</div><div class="badge-name">${b.name}</div></div>`;}).join('')}
+      </div>
+      <div class="divider"></div>
+      <div class="section-title" style="margin-top:4px"><span>📈</span>التقدم</div>
+      <div class="pb-wrap"><div class="pb-fill" style="width:${Math.min(100,Math.round(pts/5))}%"></div></div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:6px">${Math.min(100,Math.round(pts/5))}%</div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="tabs" style="margin-bottom:0;flex:1">
+        <button class="tab-btn ${state.tab==='sessions'?'active':''}" onclick="setTab('sessions')">سجل الجلسات</button>
+        <button class="tab-btn ${state.tab==='mistakes'?'active':''}" onclick="setTab('mistakes')">الأخطاء المتكررة</button>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openSessionModal('${s.id}')" style="margin-right:12px">+ إضافة جلسة</button>
+    </div>
+    ${tabContent}
+  </div>`;
+}
+
+function renderAddStudentModal(){
+  const f=state.form;
+  return`<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-header"><h3>➕ إضافة طالب جديد</h3><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group"><label>اسم الطالب *</label><input type="text" id="f-name" value="${f.name||''}" placeholder="محمد أحمد"></div>
+          <div class="form-group"><label>العمر</label><input type="number" id="f-age" value="${f.age||''}" placeholder="12" min="5" max="99"></div>
+          <div class="form-group"><label>المستوى</label><select id="f-level"><option value="مبتدئ">مبتدئ</option><option value="متوسط">متوسط</option><option value="متقدم">متقدم</option></select></div>
+          <div class="form-group"><label>رقم ولي الأمر</label><input type="tel" id="f-parent" value="${f.parent||''}" placeholder="05xxxxxxxx"></div>
+          <div class="form-group"><label>تاريخ البدء</label><input type="date" id="f-start" value="${new Date().toISOString().split('T')[0]}"></div>
+          <div class="form-group"><label>الحلقة (اختياري)</label><select id="f-circle"><option value="">— بدون حلقة —</option>${state.circles.map(ci=>`<option value="${ci.id}">${ci.icon||'🕌'} ${ci.name}</option>`).join('')}</select></div>
+          <div class="form-group form-full"><label>ملاحظات</label><textarea id="f-notes" placeholder="أي ملاحظات...">${f.notes||''}</textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="saveStudent()">💾 حفظ الطالب</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSessionModal(sid){
+  const sf=state.sessionForm;
+  function starRow(key,label){return`<div class="form-group"><label>${label}</label><div class="rating-input">${[1,2,3,4,5].map(n=>`<button class="star-btn ${sf.stars[key]>=n?'active':''}" onclick="setStar('${key}',${n})">★</button>`).join('')}<span style="font-size:13px;color:var(--text-muted);margin-right:6px">${sf.stars[key]>0?sf.stars[key]+'/5':''}</span></div></div>`;}
+  return`<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-header"><h3>📚 تسجيل جلسة جديدة</h3><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group"><label>التاريخ</label><input type="date" id="sf-date" value="${new Date().toISOString().split('T')[0]}"></div>
+          <div class="form-group"><label>اسم السورة</label><select id="sf-surah"><option value="">-- اختر السورة --</option>${SURAHS.map(s=>`<option value="${s}">${s}</option>`).join('')}</select></div>
+          <div class="form-group"><label>من الآية</label><input type="number" id="sf-from" value="1" min="1"></div>
+          <div class="form-group"><label>إلى الآية</label><input type="number" id="sf-to" value="" min="1"></div>
+          ${starRow('mem','⭐ تقييم الحفظ')}
+          ${starRow('tajweed','📖 تقييم التجويد')}
+          ${starRow('commit','✅ تقييم الالتزام')}
+          <div class="form-group form-full">
+<div class='form-group form-full'>
+  <label>تفصيل الأخطاء</label>
+  <div id='mistakes-container'></div>
+  <button type='button' class='btn btn-outline btn-sm' onclick='addMistakeRow()'>+ إضافة خطأ</button>
+</div>
+<script>
+window.addMistakeRow=function(){
+  const c=document.getElementById('mistakes-container');
+  if(!c)return;
+  const row=document.createElement('div');
+  row.className='mistake-item';
+  row.style='display:grid;grid-template-columns:120px 100px 1fr auto;gap:8px;margin-bottom:8px;align-items:center';
+  row.innerHTML=`
+    <select class='m-type'>
+      <option>حفظ</option>
+      <option>تجويد</option>
+      <option>نطق</option>
+      <option>وقف وابتداء</option>
+    </select>
+    <input class='m-ayah' type='number' placeholder='رقم الآية' min='1'>
+    <input class='m-note' type='text' placeholder='وصف الخطأ'>
+    <button type='button' class='btn btn-sm' style='background:#fff0f0;color:#c0392b;border:1px solid #ffcccc' onclick='this.parentElement.remove()'>✕</button>
+  `;
+  c.appendChild(row);
+};
+</script>
+<label>الأخطاء العامة</label><div style="display:flex;gap:10px;margin-top:4px">${['تجويد','حفظ','نطق'].map(m=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" onchange="toggleMistake('${m}',this.checked)">${m}</label>`).join('')}</div></div>
+          <div class="form-group form-full"><label>نقاط الجلسة</label><input type='number' id='sf-points' min='0' value='0'><label>ملخص الجلسة</label><textarea id="sf-summary" placeholder="ملاحظات عامة..."></textarea></div>
+          <div class="form-group form-full"><label>ملخص المعنى</label><textarea id="sf-meaning" placeholder="هل استوعب الطالب المعنى؟..."></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="saveSession('${sid}')">💾 حفظ الجلسة</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   TEACHER ACTIONS
+═══════════════════════════════════════════════ */
+window.openAddCircle=function(){state.circleForm={icon:'🕌'};state.modal='addCircle';render();};
+window.openAddStudentToCircle=function(cid){state.modal={type:'addToCircle',circleId:cid};render();};
+
+window.viewCircle=function(id){
+  state.selectedCircle=id;
+  state.page='circleDetail';
+  state.search='';
+  render();
+};
+
+window.saveCircle=async function(){
+  const name=document.getElementById('c-name')?.value?.trim();
+  if(!name){showToast('⚠️ أدخلي اسم الحلقة');return;}
+  const data={
+    name,
+    description:document.getElementById('c-desc')?.value||'',
+    icon:state.circleForm.icon||'🕌',
+  };
+  try{
+    const id=await fbAddCircle(data);
+    state.circles.push({id,...data});
+    state.modal=null;
+    showToast('✅ تم إنشاء الحلقة بنجاح');
+    render();
+  }catch(e){showToast('❌ خطأ: '+e.message);}
+};
+
+window.deleteCircle=async function(id,name){
+  if(!confirm('هل أنتِ متأكدة من حذف حلقة "'+name+'"؟\nسيتم إزالة الطلاب منها (لن يُحذف الطلاب أنفسهم).'))return;
+  try{
+    await fbDeleteCircle(id);
+    state.circles=state.circles.filter(x=>x.id!==id);
+    state.students.forEach(s=>{if(s.circleId===id){s.circleId='';s.circleName='';}});
+    showToast('✅ تم حذف الحلقة');
+    render();
+  }catch(e){showToast('❌ خطأ: '+e.message);}
+};
+
+window.addStudentsToCircle=async function(circleId){
+  const checkboxes=document.querySelectorAll('#students-to-add input[type=checkbox]:checked');
+  if(!checkboxes.length){showToast('⚠️ اختاري طالباً واحداً على الأقل');return;}
+  const circle=state.circles.find(x=>x.id===circleId);
+  const batch=db.batch();
+  checkboxes.forEach(cb=>{
+    const sid=cb.value;
+    const ref=col('students').doc(sid);
+    batch.update(ref,{circleId,circleName:circle?circle.name:''});
+  });
+  try{
+    await batch.commit();
+    checkboxes.forEach(cb=>{
+      const s=state.students.find(x=>x.id===cb.value);
+      if(s){s.circleId=circleId;s.circleName=circle?circle.name:'';}
+    });
+    state.modal=null;
+    showToast('✅ تم إضافة الطلاب للحلقة');
+    render();
+  }catch(e){showToast('❌ خطأ: '+e.message);}
+};
+
+window.removeFromCircle=async function(studentId){
+  try{
+    await col('students').doc(studentId).update({circleId:'',circleName:''});
+    const s=state.students.find(x=>x.id===studentId);
+    if(s){s.circleId='';s.circleName='';}
+    showToast('✅ تم إزالة الطالب من الحلقة');
+    render();
+  }catch(e){showToast('❌ خطأ: '+e.message);}
+};
+
+window.navigate=p=>{state.page=p;state.selectedStudent=null;render();};
+window.viewStudent=id=>{state.selectedStudent=id;state.page='profile';state.tab='sessions';render();};
+window.setTab=t=>{state.tab=t;render();};
+window.openAddStudent=()=>{state.form={};state.modal='addStudent';render();};
+window.openSessionModal=sid=>{state.sessionForm={date:new Date().toISOString().split('T')[0],stars:{mem:0,tajweed:0,commit:0},mistakes:[]};state.modal={type:'session',sid};render();};
+window.closeModal=()=>{state.modal=null;render();};
+window.setStar=(k,v)=>{state.sessionForm.stars[k]=v;render();};
+window.toggleMistake=(m,c)=>{if(c&&!state.sessionForm.mistakes.includes(m))state.sessionForm.mistakes.push(m);else state.sessionForm.mistakes=state.sessionForm.mistakes.filter(x=>x!==m);};
+
+window.saveStudent=async function(){
+  const name=document.getElementById('f-name')?.value?.trim();
+  if(!name){showToast('⚠️ يرجى إدخال اسم الطالب');return;}
+  const circleId=document.getElementById('f-circle')?.value||'';
+  const circle=state.circles.find(x=>x.id===circleId);
+  const data={name,age:parseInt(document.getElementById('f-age')?.value)||0,level:document.getElementById('f-level')?.value||'مبتدئ',parent:document.getElementById('f-parent')?.value||'',startDate:document.getElementById('f-start')?.value||'',notes:document.getElementById('f-notes')?.value||'',circleId,circleName:circle?circle.name:''};
+  try{
+    const id=await fbAddStudent(data);
+    state.students.push({id,...data,sessions:[]});
+    state.modal=null;state.page='students';
+    showToast('✅ تم إضافة الطالب بنجاح');render();
+  }catch(e){showToast('❌ خطأ: '+e.message);}
+};
+
+window.saveSession=async function(sid){
+  const surah=document.getElementById('sf-surah')?.value;
+  if(!surah){showToast('⚠️ يرجى اختيار السورة');return;}
+  if(!state.sessionForm.stars.mem){showToast('⚠️ يرجى تقييم الحفظ');return;}
+  const data={date:document.getElementById('sf-date')?.value,surah,fromAyah:parseInt(document.getElementById('sf-from')?.value||1),toAyah:parseInt(document.getElementById('sf-to')?.value||1),memRating:state.sessionForm.stars.mem,tajweedRating:state.sessionForm.stars.tajweed||1,commitRating:state.sessionForm.stars.commit||1,mistakes:[...state.sessionForm.mistakes],
+    detailedMistakes:Array.from(document.querySelectorAll('.mistake-item')).map(el=>({
+      type:el.querySelector('.m-type')?.value||'حفظ',
+      ayah:parseInt(el.querySelector('.m-ayah')?.value||0),
+      note:el.querySelector('.m-note')?.value||''
+    })),
+    points:parseInt(document.getElementById('sf-points')?.value||0),
+    summary:document.getElementById('sf-summary')?.value||''};
+  try{
+    const id=await fbAddSession(sid,data);
+    const s=state.students.find(x=>x.id===sid);
+    if(s)s.sessions.push({id,...data});
+    state.modal=null;showToast('✅ تم تسجيل الجلسة بنجاح');render();
+  }catch(e){showToast('❌ خطأ: '+e.message);}
+};
+
+window.createAccountForStudent=async function(studentId){
+  const email=document.getElementById('cred-email')?.value?.trim();
+  const pass=document.getElementById('cred-pass')?.value;
+  const statusEl=document.getElementById('cred-status-'+studentId);
+  if(!email||!pass){showToast('⚠️ أدخل البريد وكلمة المرور');return;}
+  if(pass.length<6){showToast('⚠️ كلمة المرور 6 أحرف على الأقل');return;}
+  if(statusEl)statusEl.textContent='جارٍ الإنشاء...';
+
+  const apiKey=firebaseConfig.apiKey;
+  if(!apiKey){showToast('❌ لم يتم العثور على مفتاح API');return;}
+
+  try{
+    const res=await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`,
+      {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email,password:pass,returnSecureToken:true})
+      }
+    );
+    const data=await res.json();
+    if(data.error){
+      const errs={
+        'EMAIL_EXISTS':'هذا البريد مستخدم بالفعل',
+        'WEAK_PASSWORD : Password should be at least 6 characters':'كلمة المرور ضعيفة جداً',
+        'INVALID_EMAIL':'البريد الإلكتروني غير صالح',
+      };
+      const msg=errs[data.error.message]||data.error.message;
+      showToast('❌ '+msg);
+      if(statusEl)statusEl.textContent='';
+      return;
+    }
+
+    const studentUid=data.localId;
+    const teacherUid=currentUser.uid;
+
+    await db.collection('users').doc(studentUid).set({
+      role:'student',
+      email,
+      linkedStudentId:studentId,
+      linkedTeacherId:teacherUid,
+    });
+
+    await db.collection('users').doc(teacherUid)
+      .collection('students').doc(studentId)
+      .update({studentUid,studentEmail:email});
+
+    const s=state.students.find(x=>x.id===studentId);
+    if(s){s.studentEmail=email;s.studentUid=studentUid;}
+
+    showToast('✅ تم إنشاء حساب الطالب بنجاح!');
+    render();
+
+  }catch(e){
+    showToast('❌ خطأ في الشبكة: '+e.message);
+    if(statusEl)statusEl.textContent='فشل الإنشاء';
+  }
+};
+
+function render(){
+  const _circleDetailName=state.selectedCircle?(state.circles.find(x=>x.id===state.selectedCircle)?.name||''):'';
+  const title={dashboard:'لوحة التحكم',students:'جميع الطلاب',circles:'الحلقات',circleDetail:'حلقة — '+_circleDetailName,profile:state.selectedStudent?state.students.find(x=>x.id===state.selectedStudent)?.name:''}[state.page]||'';
+  let actions='';
+  if(state.page==='students')actions=`<div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="بحث..." value="${state.search}" oninput="state.search=this.value;render()"></div><button class="btn btn-primary" onclick="openAddStudent()">+ إضافة طالب</button>`;
+  else if(state.page==='circles')actions=`<button class="btn btn-primary" onclick="openAddCircle()">+ إضافة حلقة</button>`;
+  else if(state.page==='circleDetail')actions=`<div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="بحث في الحلقة..." value="${state.search}" oninput="state.search=this.value;render()"></div>`;
+  else if(state.page==='profile'&&state.selectedStudent){const s=state.students.find(x=>x.id===state.selectedStudent);if(s)actions=`<button class="btn btn-gold btn-sm" onclick="openSessionModal('${s.id}')">+ جلسة جديدة</button>`;}
+  let page='';
+  if(state.page==='dashboard')page=renderDashboard();
+  else if(state.page==='students')page=renderStudents();
+  else if(state.page==='circles')page=renderCircles();
+  else if(state.page==='circleDetail'&&state.selectedCircle)page=renderCircleDetail(state.selectedCircle);
+  else if(state.page==='profile'&&state.selectedStudent){const s=state.students.find(x=>x.id===state.selectedStudent);if(s)page=renderStudentProfile(s);}
+  let modal='';
+  if(state.modal==='addStudent')modal=renderAddStudentModal();
+  else if(state.modal==='addCircle')modal=renderAddCircleModal();
+  else if(state.modal&&state.modal.type==='addToCircle')modal=renderAddStudentToCircleModal(state.modal.circleId);
+  else if(state.modal&&state.modal.type==='session')modal=renderSessionModal(state.modal.sid);
+
+  document.getElementById('app').innerHTML=`
+    <div class="sidebar">
+      <div class="sidebar-logo"><span class="crescent">☽</span><h1>أُنس</h1><p>المعلم الرقمي</p></div>
+      <nav class="sidebar-nav">
+        <div class="nav-item ${state.page==='dashboard'?'active':''}" onclick="navigate('dashboard')"><span class="nav-icon">🏠</span><span>لوحة التحكم</span></div>
+        <div class="nav-item ${state.page==='circles'||state.page==='circleDetail'?'active':''}" onclick="navigate('circles')"><span class="nav-icon">🕌</span><span>الحلقات</span></div>
+        <div class="nav-item ${state.page==='students'||state.page==='profile'?'active':''}" onclick="navigate('students')"><span class="nav-icon">👥</span><span>جميع الطلاب</span></div>
+      </nav>
+      <div class="user-info"><p>👨‍🏫 ${currentUser?.email||''}</p><button class="logout-btn" onclick="doLogout()">تسجيل الخروج</button></div>
+      <div class="sidebar-footer"><p>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p></div>
+    </div>
+    <div class="main">
+      <div class="topbar"><h2>${title}</h2><div class="topbar-actions">${actions}</div></div>
+      <div class="content">${page}</div>
+    </div>
+    ${modal}`;
+}
+</script>
+</body>
+</html>
+<script>
+window.editSession=function(studentId,sessionId){
+  const s=state.students.find(x=>x.id===studentId);
+  if(!s)return;
+  const ss=s.sessions.find(x=>x.id===sessionId);
+  if(!ss)return;
+  const txt=prompt('تعديل التقرير', ss.summary||'');
+  if(txt===null)return;
+  ss.summary=txt;
+  if(currentUser&&db){
+    db.collection('users').doc(currentUser.uid)
+      .collection('students').doc(studentId)
+      .collection('sessions').doc(sessionId)
+      .update({summary:txt});
+  }
+  showToast('✅ تم تعديل التقرير');
+  render();
+};
+</script>
