@@ -189,7 +189,26 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 .mistake-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
 .mistake-tag{padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;background:rgba(231,76,60,0.1);color:#c0392b;}
 .mistake-tag.tajweed{background:rgba(150,100,200,0.1);color:#6b3da1;}
-.mistake-tag.pronunciation{background:rgba(155,89,182,0.1);color:#7b4d9e;}
+.mistake-tag.pronunciation{background:rgba(155,89,182,0.1);color:#7b4d9e;
+                           /* Detailed mistake entry */
+.mistake-section{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-top:4px;}
+.mistake-section-title{font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.mistake-section-title.taj{color:#1a6fa3;}
+.mistake-section-title.mem{color:#c0392b;}
+.mistake-section-title.pro{color:#7b4d9e;}
+.mistake-entries{display:flex;flex-direction:column;gap:6px;}
+.mistake-entry-row{display:flex;align-items:center;gap:6px;}
+.mistake-entry-row input[type=number]{width:70px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-family:'Cairo',sans-serif;font-size:12px;text-align:center;}
+.mistake-entry-row input[type=text]{flex:1;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-family:'Cairo',sans-serif;font-size:12px;}
+.mistake-entry-row input:focus{outline:none;border-color:var(--green);}
+.add-mistake-btn{font-size:11px;color:var(--green);background:rgba(31,111,94,0.08);border:1px dashed var(--green);border-radius:6px;padding:4px 10px;cursor:pointer;margin-top:4px;font-family:'Cairo',sans-serif;}
+.add-mistake-btn:hover{background:rgba(31,111,94,0.15);}
+.remove-mistake-btn{background:#fff0f0;border:1px solid #ffcccc;color:#c0392b;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:12px;font-family:'Cairo',sans-serif;}
+.detailed-mistake-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;margin:2px;}
+.detailed-mistake-tag.tajweed{background:rgba(52,152,219,0.1);color:#1a6fa3;}
+.detailed-mistake-tag.memorization{background:rgba(231,76,60,0.1);color:#c0392b;}
+.detailed-mistake-tag.pronunciation{background:rgba(155,89,182,0.1);color:#7b4d9e;}
+.ayah-num{font-weight:800;font-size:12px;}
 .pb-wrap{background:var(--beige-dark);border-radius:10px;height:8px;overflow:hidden;}
 .pb-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--green),var(--green-light));transition:width 0.6s;}
 .badges-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
@@ -299,7 +318,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 <!-- ══ ROLE PICKER ══ -->
 <div id="role-screen" class="full-screen bg-dark">
   <div class="role-box">
-    <span class="crescent">☽</span>
+    <span class="crescent style="color:#ffffff">☽</span>
     <h2>أنس</h2>
     <p>اختر نوع الدخول</p>
     <div id="fb-load-err" style="display:none;background:#fff3f3;border:1px solid #ffb3b3;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#c0392b;text-align:right;line-height:1.8">
@@ -327,8 +346,8 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 <!-- ══ TEACHER AUTH ══ -->
 <div id="teacher-auth" class="full-screen bg-dark hidden">
   <div class="auth-box">
-    <span class="crescent">☽</span>
-    <h2>أنس</h2>
+    <span class="crescent style="color:#ffffff">☽</span>
+    <h2>أُنس</h2>
     <span class="auth-role-tag teacher">👨‍🏫 دخول المعلم</span>
     <div id="t-auth-err" class="auth-err"></div>
     <input class="auth-input" id="t-email"    type="email"    placeholder="البريد الإلكتروني">
@@ -457,6 +476,7 @@ function initFirebase(cfg){
     if(!firebase.apps.length) firebase.initializeApp(cfg);
     db=firebase.firestore();
     auth=firebase.auth();
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     loading(false);
     document.getElementById('fb-load-err').style.display='none';
     show('role-screen');
@@ -482,11 +502,31 @@ function initFirebase(cfg){
 }
 
 window.addEventListener('load',()=>{
-  loadFirebase(firebaseConfig);
+ const saved=localStorage.getItem(CFG_KEY);
+  if(saved){
+    try{
+      const cfg=JSON.parse(saved);
+      ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+        const el=document.getElementById('cfg-'+k);
+        if(el)el.value=cfg[k]||'';
+      });
+      loadFirebase(cfg);
+    }catch(e){
+      show('role-screen');
+    }
+  } else {
+    // No saved config — show role screen normally (will redirect to config when needed)
+    show('role-screen');
+  }
 });
 
 window.retryFirebaseLoad=function(){
-  loadFirebase(firebaseConfig);
+  onst saved=localStorage.getItem(CFG_KEY);
+  if(saved){
+    try{ loadFirebase(JSON.parse(saved)); }catch(e){}
+  } else {
+    show('config-screen');
+  }
 };
 
 /* ═══════════════════════════════════════════════
@@ -599,7 +639,7 @@ function renderStudentPortal(s){
         </div>
         <div class="rating-row">
           <div class="rating-pill mem">📖 حفظ: ${ss.memRating}/5 <span class="stars-sm">${starsHtml(ss.memRating)}</span></div>
-          <div class="rating-pill taj">🎵 تجويد: ${ss.tajweedRating}/5 <span class="stars-sm">${starsHtml(ss.tajweedRating)}</span></div>
+          <div class="rating-pill taj">👂🏼 تجويد: ${ss.tajweedRating}/5 <span class="stars-sm">${starsHtml(ss.tajweedRating)}</span></div>
           <div class="rating-pill com">✅ التزام: ${ss.commitRating}/5 <span class="stars-sm">${starsHtml(ss.commitRating)}</span></div>
         </div>
         ${(ss.mistakes||[]).length>0?`<div class="portal-mistake-tags">${ss.mistakes.map(m=>`<span class="portal-mistake-tag ${m==='تجويد'?'tajweed':m==='نطق'?'pronunciation':''}">${m}</span>`).join('')}</div>`:''}
@@ -757,6 +797,32 @@ function weekSessions(){const w=new Date(Date.now()-7*24*60*60*1000);let c=0;sta
 function topStudents(){return state.students.filter(s=>s.sessions.length>0).map(s=>({...s,points:calcPoints(s),avg:avgRating(s)})).sort((a,b)=>b.points-a.points).slice(0,5);}
 function attentionStudents(){return state.students.filter(s=>{if(!s.sessions.length)return true;const l=s.sessions[s.sessions.length-1];return l.memRating<=2||l.tajweedRating<=2;});}
 function allMistakes(){const c={'تجويد':0,'حفظ':0,'نطق':0};state.students.forEach(s=>s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{if(c[m]!==undefined)c[m]++;})));return c;}
+
+/* ═══════════════════════════════════════════════
+/* ═══════════════════════════════════════════════
+   MISTAKE DISPLAY HELPER
+═══════════════════════════════════════════════ */
+function renderDetailedMistakeTags(dm, mode){
+  if(!dm) return '';
+  const types=[
+    {key:'tajweed', label:'تجويد', cls:'tajweed', icon:'📖'},
+    {key:'memorization', label:'حفظ', cls:'memorization', icon:'🧠'},
+    {key:'pronunciation', label:'نطق', cls:'pronunciation', icon:'🗣️'},
+  ];
+  const tagClass = mode==='portal'?'portal-mistake-tag':'mistake-tag';
+  let html='';
+  types.forEach(t=>{
+    const entries=(dm[t.key]||[]).filter(e=>e.ayah||e.note);
+    if(!entries.length) return;
+    entries.forEach(e=>{
+      const ayahText=e.ayah?`آية ${e.ayah}`:'';
+      const noteText=e.note?` — ${e.note}`:'';
+      html+=`<span class="${tagClass} ${t.cls}" style="margin:2px">${t.icon} ${ayahText}${noteText}</span>`;
+    });
+  });
+  if(!html) return '';
+  return `<div class="mistake-tags" style="margin-top:8px">${html}</div>`;
+}
 
 /* ═══════════════════════════════════════════════
    CIRCLES RENDER
@@ -1088,6 +1154,24 @@ function renderAddStudentModal(){
         <button class="btn btn-primary" onclick="saveStudent()">💾 حفظ الطالب</button>
       </div>
     </div>
+  </div>`;
+}
+function renderMistakeSection(type, label, icon, cssClass){
+  const entries = state.sessionForm.detailedMistakes[type] || [];
+  return `<div class="mistake-section">
+    <div class="mistake-section-title ${cssClass}">${icon} ${label}</div>
+    <div class="mistake-entries" id="me-${type}">
+      ${entries.map((e,i)=>`
+        <div class="mistake-entry-row">
+          <span style="font-size:11px;color:var(--text-muted);white-space:nowrap">آية</span>
+          <input type="number" min="1" placeholder="رقم" value="${e.ayah||''}"
+            oninput="state.sessionForm.detailedMistakes['${type}'][${i}].ayah=this.value">
+          <input type="text" placeholder="وصف الخطأ (اختياري)" value="${e.note||''}"
+            oninput="state.sessionForm.detailedMistakes['${type}'][${i}].note=this.value">
+          <button class="remove-mistake-btn" onclick="removeMistakeEntry('${type}',${i})">✕</button>
+        </div>`).join('')}
+    </div>
+    <button class="add-mistake-btn" onclick="addMistakeEntry('${type}')">+ إضافة خطأ</button>
   </div>`;
 }
 
