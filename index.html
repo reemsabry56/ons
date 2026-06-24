@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>أُنس</title>
+<title>أنس</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -27,7 +27,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 
 /* ── Role picker ── */
 .role-box{background:var(--white);border-radius:var(--radius);padding:36px 28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.4);border-top:4px solid var(--gold);text-align:center;}
-.role-box .crescent{font-size:44px;display:block;margin-bottom:10px;color:#ffffff;}
+.role-box .crescent{font-size:44px;display:block;margin-bottom:10px;}
 .role-box h2{font-size:19px;font-weight:800;color:var(--green-dark);margin-bottom:6px;}
 .role-box p{font-size:12px;color:var(--text-muted);margin-bottom:28px;}
 .role-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px;}
@@ -39,7 +39,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 
 /* ── Auth box ── */
 .auth-box{background:var(--white);border-radius:var(--radius);padding:36px 32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.4);border-top:4px solid var(--gold);text-align:center;}
-.auth-box .crescent{font-size:36px;display:block;margin-bottom:8px;color:#ffffff;}
+.auth-box .crescent{font-size:36px;display:block;margin-bottom:8px;}
 .auth-box h2{font-size:17px;font-weight:800;color:var(--green-dark);margin-bottom:3px;}
 .auth-box .sub{font-size:12px;color:var(--text-muted);margin-bottom:20px;}
 .auth-role-tag{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:18px;}
@@ -66,7 +66,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 #app{position:relative;z-index:1;display:flex;height:100vh;overflow:hidden;}
 .sidebar{width:240px;min-width:240px;background:var(--green-dark);display:flex;flex-direction:column;border-left:3px solid var(--gold);overflow-y:auto;}
 .sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(179,102,179,0.3);text-align:center;}
-.sidebar-logo .crescent{font-size:32px;display:block;margin-bottom:6px;color:#ffffff;}
+.sidebar-logo .crescent{font-size:32px;display:block;margin-bottom:6px;}
 .sidebar-logo h1{color:var(--gold);font-size:24px;font-weight:800;line-height:1.4;}
 .sidebar-logo p{color:rgba(255,255,255,0.6);font-size:12px;margin-top:2px;}
 .sidebar-nav{flex:1;padding:14px 10px;}
@@ -90,13 +90,13 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 #student-portal{position:relative;z-index:1;min-height:100vh;display:none;}
 .portal-header{background:var(--green-dark);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--gold);}
 .portal-header h1{color:var(--gold);font-size:16px;font-weight:700;}
-.portal-header .crescent{font-size:22px;margin-left:8px;color:#ffffff;}
+.portal-header .crescent{font-size:22px;margin-left:8px;}
 .portal-content{max-width:700px;margin:0 auto;padding:24px 16px;}
 .portal-hero{background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:var(--radius);padding:24px;color:white;margin-bottom:20px;display:flex;align-items:center;gap:18px;}
 .portal-avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:var(--gold);flex-shrink:0;}
 .portal-hero h2{font-size:19px;font-weight:800;margin-bottom:4px;}
 .portal-hero p{font-size:12px;opacity:0.8;}
-.portal-pts{color:#ffffff;margin-top:10px;font-size:28px;font-weight:800;color:var(--gold);}
+.portal-pts{margin-top:10px;font-size:28px;font-weight:800;color:var(--gold);}
 .portal-pts span{font-size:13px;font-weight:400;opacity:0.8;}
 .portal-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
 .portal-stat{background:var(--white);border-radius:var(--radius);padding:16px;text-align:center;border:1px solid var(--border);box-shadow:var(--shadow);}
@@ -300,7 +300,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 <div id="role-screen" class="full-screen bg-dark">
   <div class="role-box">
     <span class="crescent">☽</span>
-    <h2>أُنس</h2>
+    <h2>أنس</h2>
     <p>اختر نوع الدخول</p>
     <div id="fb-load-err" style="display:none;background:#fff3f3;border:1px solid #ffb3b3;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#c0392b;text-align:right;line-height:1.8">
       ⚠️ <strong>تعذّر الاتصال بـ Firebase.</strong><br>
@@ -328,7 +328,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 <div id="teacher-auth" class="full-screen bg-dark hidden">
   <div class="auth-box">
     <span class="crescent">☽</span>
-    <h2>أُنس</h2>
+    <h2>أنس</h2>
     <span class="auth-role-tag teacher">👨‍🏫 دخول المعلم</span>
     <div id="t-auth-err" class="auth-err"></div>
     <input class="auth-input" id="t-email"    type="email"    placeholder="البريد الإلكتروني">
@@ -343,7 +343,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 <div id="student-auth" class="full-screen bg-dark hidden">
   <div class="auth-box">
     <span class="crescent">☽</span>
-    <h2>أُنس</h2>
+    <h2>أنس</h2>
     <span class="auth-role-tag student">🎓 دخول الطالب</span>
     <p class="sub">ادخل باستخدام البريد وكلمة المرور التي أعطاكها المعلم</p>
     <div id="s-auth-err" class="auth-err"></div>
@@ -532,8 +532,6 @@ window.studentLogin=async function(){
   if(!auth){document.getElementById('s-auth-err').innerHTML='⏳ Firebase لم يتحمل بعد. <span style="cursor:pointer;color:var(--green);text-decoration:underline" onclick="retryFirebaseLoad()">اضغط هنا للمحاولة مجدداً</span>';return;}
   try{
     const cred=await auth.signInWithEmailAndPassword(email,pass);
-    localStorage.setItem('student_email',email);
-    localStorage.setItem('student_logged','1');
     const sData=await getStudentDataByUid(cred.user.uid);
     if(!sData){
       await auth.signOut();
@@ -606,14 +604,14 @@ function renderStudentPortal(s){
         </div>
         ${(ss.mistakes||[]).length>0?`<div class="portal-mistake-tags">${ss.mistakes.map(m=>`<span class="portal-mistake-tag ${m==='تجويد'?'tajweed':m==='نطق'?'pronunciation':''}">${m}</span>`).join('')}</div>`:''}
         ${ss.summary?`<div class="portal-summary">💬 ${ss.summary}</div>`:''}
-        
+        ${ss.meaningSummary?`<div class="portal-summary" style="margin-top:6px">📚 ${ss.meaningSummary}</div>`:''}
       </div>`).join('');
 
   document.getElementById('student-portal').innerHTML=`
     <div class="portal-header">
       <div style="display:flex;align-items:center">
         <span class="crescent">☽</span>
-        <h1>بوابة الطالب — أُنس</h1>
+        <h1>بوابة الطالب — أنس</h1>
       </div>
       <button class="portal-logout" onclick="studentLogout()">تسجيل الخروج</button>
     </div>
@@ -1108,35 +1106,8 @@ function renderSessionModal(sid){
           ${starRow('mem','⭐ تقييم الحفظ')}
           ${starRow('tajweed','📖 تقييم التجويد')}
           ${starRow('commit','✅ تقييم الالتزام')}
-          <div class="form-group form-full">
-<div class='form-group form-full'>
-  <label>تفصيل الأخطاء</label>
-  <div id='mistakes-container'></div>
-  <button type='button' class='btn btn-outline btn-sm' onclick='addMistakeRow()'>+ إضافة خطأ</button>
-</div>
-<script>
-window.addMistakeRow=function(){
-  const c=document.getElementById('mistakes-container');
-  if(!c)return;
-  const row=document.createElement('div');
-  row.className='mistake-item';
-  row.style='display:grid;grid-template-columns:120px 100px 1fr auto;gap:8px;margin-bottom:8px;align-items:center';
-  row.innerHTML=`
-    <select class='m-type'>
-      <option>حفظ</option>
-      <option>تجويد</option>
-      <option>نطق</option>
-      <option>وقف وابتداء</option>
-    </select>
-    <input class='m-ayah' type='number' placeholder='رقم الآية' min='1'>
-    <input class='m-note' type='text' placeholder='وصف الخطأ'>
-    <button type='button' class='btn btn-sm' style='background:#fff0f0;color:#c0392b;border:1px solid #ffcccc' onclick='this.parentElement.remove()'>✕</button>
-  `;
-  c.appendChild(row);
-};
-</script>
-<label>الأخطاء العامة</label><div style="display:flex;gap:10px;margin-top:4px">${['تجويد','حفظ','نطق'].map(m=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" onchange="toggleMistake('${m}',this.checked)">${m}</label>`).join('')}</div></div>
-          <div class="form-group form-full"><label>نقاط الجلسة</label><input type='number' id='sf-points' min='0' value='0'><label>ملخص الجلسة</label><textarea id="sf-summary" placeholder="ملاحظات عامة..."></textarea></div>
+          <div class="form-group form-full"><label>الأخطاء</label><div style="display:flex;gap:10px;margin-top:4px">${['تجويد','حفظ','نطق'].map(m=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" onchange="toggleMistake('${m}',this.checked)">${m}</label>`).join('')}</div></div>
+          <div class="form-group form-full"><label>ملخص الجلسة</label><textarea id="sf-summary" placeholder="ملاحظات عامة..."></textarea></div>
           <div class="form-group form-full"><label>ملخص المعنى</label><textarea id="sf-meaning" placeholder="هل استوعب الطالب المعنى؟..."></textarea></div>
         </div>
       </div>
@@ -1248,14 +1219,7 @@ window.saveSession=async function(sid){
   const surah=document.getElementById('sf-surah')?.value;
   if(!surah){showToast('⚠️ يرجى اختيار السورة');return;}
   if(!state.sessionForm.stars.mem){showToast('⚠️ يرجى تقييم الحفظ');return;}
-  const data={date:document.getElementById('sf-date')?.value,surah,fromAyah:parseInt(document.getElementById('sf-from')?.value||1),toAyah:parseInt(document.getElementById('sf-to')?.value||1),memRating:state.sessionForm.stars.mem,tajweedRating:state.sessionForm.stars.tajweed||1,commitRating:state.sessionForm.stars.commit||1,mistakes:[...state.sessionForm.mistakes],
-    detailedMistakes:Array.from(document.querySelectorAll('.mistake-item')).map(el=>({
-      type:el.querySelector('.m-type')?.value||'حفظ',
-      ayah:parseInt(el.querySelector('.m-ayah')?.value||0),
-      note:el.querySelector('.m-note')?.value||''
-    })),
-    points:parseInt(document.getElementById('sf-points')?.value||0),
-    summary:document.getElementById('sf-summary')?.value||''};
+  const data={date:document.getElementById('sf-date')?.value,surah,fromAyah:parseInt(document.getElementById('sf-from')?.value||1),toAyah:parseInt(document.getElementById('sf-to')?.value||1),memRating:state.sessionForm.stars.mem,tajweedRating:state.sessionForm.stars.tajweed||1,commitRating:state.sessionForm.stars.commit||1,mistakes:[...state.sessionForm.mistakes],summary:document.getElementById('sf-summary')?.value||'',meaningSummary:document.getElementById('sf-meaning')?.value||''};
   try{
     const id=await fbAddSession(sid,data);
     const s=state.students.find(x=>x.id===sid);
@@ -1345,7 +1309,7 @@ function render(){
 
   document.getElementById('app').innerHTML=`
     <div class="sidebar">
-      <div class="sidebar-logo"><span class="crescent">☽</span><h1>أُنس</h1><p>المعلم الرقمي</p></div>
+      <div class="sidebar-logo"><span class="crescent">☽</span><h1>أنس</h1><p>المعلم الرقمي</p></div>
       <nav class="sidebar-nav">
         <div class="nav-item ${state.page==='dashboard'?'active':''}" onclick="navigate('dashboard')"><span class="nav-icon">🏠</span><span>لوحة التحكم</span></div>
         <div class="nav-item ${state.page==='circles'||state.page==='circleDetail'?'active':''}" onclick="navigate('circles')"><span class="nav-icon">🕌</span><span>الحلقات</span></div>
@@ -1363,22 +1327,3 @@ function render(){
 </script>
 </body>
 </html>
-<script>
-window.editSession=function(studentId,sessionId){
-  const s=state.students.find(x=>x.id===studentId);
-  if(!s)return;
-  const ss=s.sessions.find(x=>x.id===sessionId);
-  if(!ss)return;
-  const txt=prompt('تعديل التقرير', ss.summary||'');
-  if(txt===null)return;
-  ss.summary=txt;
-  if(currentUser&&db){
-    db.collection('users').doc(currentUser.uid)
-      .collection('students').doc(studentId)
-      .collection('sessions').doc(sessionId)
-      .update({summary:txt});
-  }
-  showToast('✅ تم تعديل التقرير');
-  render();
-};
-</script>
