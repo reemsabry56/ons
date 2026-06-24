@@ -502,31 +502,13 @@ function initFirebase(cfg){
 }
 
 window.addEventListener('load',()=>{
- const saved=localStorage.getItem(CFG_KEY);
-  if(saved){
-    try{
-      const cfg=JSON.parse(saved);
-      ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
-        const el=document.getElementById('cfg-'+k);
-        if(el)el.value=cfg[k]||'';
-      });
-      loadFirebase(cfg);
-    }catch(e){
-      show('role-screen');
-    }
-  } else {
-    // No saved config — show role screen normally (will redirect to config when needed)
-    show('role-screen');
-  }
+   loadFirebase(firebaseConfig);
+
 });
 
 window.retryFirebaseLoad=function(){
-  const saved=localStorage.getItem(CFG_KEY);
-  if(saved){
-    try{ loadFirebase(JSON.parse(saved)); }catch(e){}
-  } else {
-    show('config-screen');
-  }
+   loadFirebase(firebaseConfig);
+
 };
 
 /* ═══════════════════════════════════════════════
