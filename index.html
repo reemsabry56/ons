@@ -521,7 +521,7 @@ window.addEventListener('load',()=>{
 });
 
 window.retryFirebaseLoad=function(){
-  onst saved=localStorage.getItem(CFG_KEY);
+  const saved=localStorage.getItem(CFG_KEY);
   if(saved){
     try{ loadFirebase(JSON.parse(saved)); }catch(e){}
   } else {
