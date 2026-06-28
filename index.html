@@ -18,7 +18,13 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Cairo',sans-serif;background:var(--beige);color:var(--text);min-height:100vh;direction:rtl;}
 body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23894889' fill-opacity='1'%3E%3Cpath d='M30 0l8.66 5v10L30 20l-8.66-5V5L30 0zm0 40l8.66 5v10L30 60l-8.66-5V45L30 40zM0 20l8.66 5v10L0 40l-8.66-5V25L0 20zM60 20l8.66 5v10L60 40l-8.66-5V25L60 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
-
+/* Logo*/
+.logo-icon {
+    width: 150px; /* يمكنك تعديل الحجم حسب الرغبة */
+    height: auto;
+    display: block;
+    margin: 0 auto 10px auto; /* للحفاظ على المسافات */
+}
 /* ── Shared overlay screens ── */
 .full-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;}
 .full-screen.hidden{display:none;}
@@ -27,7 +33,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 
 /* ── Role picker ── */
 .role-box{background:var(--white);border-radius:var(--radius);padding:36px 28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.4);border-top:4px solid var(--gold);text-align:center;}
-.role-box .crescent{font-size:44px;display:block;margin-bottom:10px;color: #ffffff;}
+
 .role-box h2{font-size:19px;font-weight:800;color:var(--green-dark);margin-bottom:6px;}
 .role-box p{font-size:12px;color:var(--text-muted);margin-bottom:28px;}
 .role-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:6px;}
@@ -299,8 +305,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 <!-- ══ ROLE PICKER ══ -->
 <div id="role-screen" class="full-screen bg-dark">
   <div class="role-box">
-    <span class="crescent style=#ffffff;">☽</span>
-    <h2>أُنس</h2>
+    <img src="anas_academy_logo_v5.png" alt="أُنس" style="width: 150px; display: block; margin: 0 auto 15px;">
     <p>اختر نوع الدخول</p>
     <div id="fb-load-err" style="display:none;background:#fff3f3;border:1px solid #ffb3b3;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#c0392b;text-align:right;line-height:1.8">
       ⚠️ <strong>تعذّر الاتصال بـ Firebase.</strong><br>
@@ -327,8 +332,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 <!-- ══ TEACHER AUTH ══ -->
 <div id="teacher-auth" class="full-screen bg-dark hidden">
   <div class="auth-box">
-    <span class="crescent style=#ffffff;">☽</span>
-    <h2>أُنس</h2>
+    <img src="anas_academy_logo_v5.png" alt="أُنس" style="width: 120px; display: block; margin: 0 auto 15px;">
     <span class="auth-role-tag teacher">👨‍🏫 دخول المعلم</span>
     <div id="t-auth-err" class="auth-err"></div>
     <input class="auth-input" id="t-email"    type="email"    placeholder="البريد الإلكتروني">
@@ -342,8 +346,7 @@ body::before{content:'';position:fixed;inset:0;opacity:0.04;pointer-events:none;
 <!-- ══ STUDENT AUTH ══ -->
 <div id="student-auth" class="full-screen bg-dark hidden">
   <div class="auth-box">
-    <span class="crescent style=#ffffff;">☽</span>
-    <h2>أُنس</h2>
+    <img src="anas_academy_logo_v5.png" alt="أُنس" style="width: 120px; display: block; margin: 0 auto 15px;">
     <span class="auth-role-tag student">🎓 دخول الطالب</span>
     <p class="sub">ادخل باستخدام البريد وكلمة المرور التي أعطاكها المعلم</p>
     <div id="s-auth-err" class="auth-err"></div>
@@ -599,29 +602,36 @@ function renderStudentPortal(s){
         </div>
         <div class="rating-row">
           <div class="rating-pill mem">📖 حفظ: ${ss.memRating}/5 <span class="stars-sm">${starsHtml(ss.memRating)}</span></div>
-          <div class="rating-pill taj">🎵 تجويد: ${ss.tajweedRating}/5 <span class="stars-sm">${starsHtml(ss.tajweedRating)}</span></div>
+          <div class="rating-pill taj">💬 تجويد: ${ss.tajweedRating}/5 <span class="stars-sm">${starsHtml(ss.tajweedRating)}</span></div>
           <div class="rating-pill com">✅ التزام: ${ss.commitRating}/5 <span class="stars-sm">${starsHtml(ss.commitRating)}</span></div>
         </div>
-        ${(ss.mistakes||[]).length>0?`<div class="portal-mistake-tags">${ss.mistakes.map(m=>`<span class="portal-mistake-tag ${m==='تجويد'?'tajweed':m==='نطق'?'pronunciation':''}">${m}</span>`).join('')}</div>`:''}
-        ${ss.summary?`<div class="portal-summary">💬 ${ss.summary}</div>`:''}
+	    ${(ss.mistakes||[]).length > 0 ? `
+		  <div class="portal-mistake-tags">
+			${ss.mistakes.map(m => `
+			  <span class="portal-mistake-tag ${m.type==='تجويد'?'tajweed':m.type==='نطق'?'pronunciation':''}" title="${m.note}">
+				${m.type} ${m.note ? ': ' + m.note : ''}
+			  </span>
+			`).join('')}
+		  </div>` : ''
+		}       
+		${ss.summary?`<div class="portal-summary">💬 ${ss.summary}</div>`:''}
         ${ss.meaningSummary?`<div class="portal-summary" style="margin-top:6px">📚 ${ss.meaningSummary}</div>`:''}
       </div>`).join('');
 
   document.getElementById('student-portal').innerHTML=`
     <div class="portal-header">
-      <div style="display:flex;align-items:center">
-        <span class="crescent style=#ffffff;">☽</span>
-        <h1>بوابة الطالب — أُنس</h1>
-      </div>
-      <button class="portal-logout" onclick="studentLogout()">تسجيل الخروج</button>
-    </div>
+	  <div style="display:flex;align-items:center">
+		<img src="anas_academy_logo_v5.png" alt="أُنس" style="width: 100px; margin-left: 12px;">
+	  </div>
+	  <button class="portal-logout" onclick="studentLogout()">تسجيل الخروج</button>
+	</div>
     <div class="portal-content">
       <div class="portal-hero">
         <div class="portal-avatar">${initials(s.name)}</div>
         <div style="flex:1">
           <h2>${s.name}</h2>
           <p>${s.level} · بدأ في ${formatDate(s.startDate)}</p>
-          <div class="portal-pts">${pts} <span>نقطة</span></div>
+          <div class="portal-pts" style="color: #ffffff;">${pts} <span>نقطة</span></div>
         </div>
       </div>
       <div class="portal-grid" style="margin-bottom:20px">
@@ -651,14 +661,18 @@ function renderStudentPortal(s){
           <span>الهدف: ${pts >= 500?'🏆 محقق!':'500 نقطة'}</span>
         </div>
       </div>
-      <div class="card" style="margin-bottom:20px">
-        <div class="portal-section-title">📊 ملخص الأخطاء</div>
-        <div class="mistake-tracker">
-          <div class="mistake-cat tajweed"><span class="mc-icon">📖</span><span class="mc-count">${mc['تجويد']}</span><span class="mc-label">تجويد</span></div>
-          <div class="mistake-cat memorization"><span class="mc-icon">🧠</span><span class="mc-count">${mc['حفظ']}</span><span class="mc-label">حفظ</span></div>
-          <div class="mistake-cat pronunciation"><span class="mc-icon">🗣️</span><span class="mc-count">${mc['نطق']}</span><span class="mc-label">نطق</span></div>
-        </div>
-      </div>
+	  <div class="card" style="margin-bottom:20px">
+		<div class="portal-section-title" style="cursor:pointer" onclick="toggleElement('mistake-details')">
+			📊 ملخص الأخطاء (اضغط للعرض)
+	    </div>
+		<div id="mistake-details" style="display:none">
+		  <div class="mistake-tracker">
+			<div class="mistake-cat tajweed"><span class="mc-icon">📖</span><span class="mc-count">${mc['تجويد']}</span><span class="mc-label">تجويد</span></div>
+			<div class="mistake-cat memorization"><span class="mc-icon">🧠</span><span class="mc-count">${mc['حفظ']}</span><span class="mc-label">حفظ</span></div>
+			<div class="mistake-cat pronunciation"><span class="mc-icon">🗣️</span><span class="mc-count">${mc['نطق']}</span><span class="mc-label">نطق</span></div>
+		   </div>
+		</div>
+	  </div>
       <div style="margin-bottom:20px">
         <div class="portal-section-title">🏆 الشارات والإنجازات</div>
         <div class="portal-badges">${badgesHtml}</div>
@@ -835,7 +849,7 @@ function renderCircleDetail(circleId){
           <button class="btn btn-sm" style="background:#fff0f0;color:#c0392b;border:1px solid #ffcccc;font-size:11px" onclick="event.stopPropagation();removeFromCircle('${s.id}')">إزالة من الحلقة</button>
         </div>
         <div class="mini-stats" style="margin-top:12px">
-          <div class="mini-stat"><span class="val">${pts}</span><span class="lbl">نقطة</span></div>
+          <div class="mini-stat"><span class="val" style="color: #ffffff;">${pts}</span><span class="lbl"style="color: #ffffff;">نقطة</span></div>
           <div class="mini-stat"><span class="val">${avg.toFixed(1)}</span><span class="lbl">معدل</span></div>
         </div>
         <div class="pb-wrap" style="margin-top:10px"><div class="pb-fill" style="width:${Math.min(100,pts/5)}%"></div></div>
@@ -957,7 +971,7 @@ function renderStudents(){
           ${s.studentEmail?`<span style="font-size:10px;color:var(--text-muted)">🔗 لديه حساب</span>`:`<span style="font-size:10px;color:#e74c3c">⚠️ لا يوجد حساب</span>`}
         </div>
         <div class="mini-stats" style="margin-top:12px">
-          <div class="mini-stat"><span class="val">${pts}</span><span class="lbl">نقطة</span></div>
+          <div class="mini-stat"><span class="val"style="color: #ffffff;">${pts}</span><span class="lbl"style="color: #ffffff;">نقطة</span></div>
           <div class="mini-stat"><span class="val">${avg.toFixed(1)}</span><span class="lbl">معدل</span></div>
           <div class="mini-stat"><span class="val">${totalMistakes(s)}</span><span class="lbl">خطأ</span></div>
         </div>
@@ -1106,7 +1120,22 @@ function renderSessionModal(sid){
           ${starRow('mem','⭐ تقييم الحفظ')}
           ${starRow('tajweed','📖 تقييم التجويد')}
           ${starRow('commit','✅ تقييم الالتزام')}
-          <div class="form-group form-full"><label>الأخطاء</label><div style="display:flex;gap:10px;margin-top:4px">${['تجويد','حفظ','نطق'].map(m=>`<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px"><input type="checkbox" onchange="toggleMistake('${m}',this.checked)">${m}</label>`).join('')}</div></div>
+		  <div class="form-group form-full">
+			<label>الأخطاء المكتشفة:</label>
+			<div style="display:flex; flex-direction:column; gap:10px; margin-top:4px">
+				${['تجويد','حفظ','نطق'].map(m => `
+					<div style="border:1px solid var(--border); padding:8px; border-radius:8px;">
+						<label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+							<input type="checkbox" onchange="toggleMistake('${m}', this.checked)" ${state.sessionForm.mistakes.find(x=>x.type===m)?'checked':''}> 
+							${m}
+						</label>
+						${state.sessionForm.mistakes.find(x=>x.type===m) ? 
+							`<input type="text" placeholder="اكتب تفاصيل خطأ ${m} هنا..." onchange="state.sessionForm.mistakes.find(x=>x.type==='${m}').note=this.value" style="width:100%; margin-top:5px;">` 
+							: ''}
+					</div>
+				`).join('')}
+			</div>
+		  </div>
           <div class="form-group form-full"><label>ملخص الجلسة</label><textarea id="sf-summary" placeholder="ملاحظات عامة..."></textarea></div>
         </div>
       </div>
@@ -1198,8 +1227,15 @@ window.openAddStudent=()=>{state.form={};state.modal='addStudent';render();};
 window.openSessionModal=sid=>{state.sessionForm={date:new Date().toISOString().split('T')[0],stars:{mem:0,tajweed:0,commit:0},mistakes:[]};state.modal={type:'session',sid};render();};
 window.closeModal=()=>{state.modal=null;render();};
 window.setStar=(k,v)=>{state.sessionForm.stars[k]=v;render();};
-window.toggleMistake=(m,c)=>{if(c&&!state.sessionForm.mistakes.includes(m))state.sessionForm.mistakes.push(m);else state.sessionForm.mistakes=state.sessionForm.mistakes.filter(x=>x!==m);};
-
+// تعديل في السكريبت
+window.toggleMistake = function(m, isChecked) {
+    if (isChecked) {
+        state.sessionForm.mistakes.push({ type: m, note: '' });
+    } else {
+        state.sessionForm.mistakes = state.sessionForm.mistakes.filter(x => x.type !== m);
+    }
+    render(); // إعادة الرسم لإظهار حقل الملاحظة
+};
 window.saveStudent=async function(){
   const name=document.getElementById('f-name')?.value?.trim();
   if(!name){showToast('⚠️ يرجى إدخال اسم الطالب');return;}
@@ -1214,17 +1250,37 @@ window.saveStudent=async function(){
   }catch(e){showToast('❌ خطأ: '+e.message);}
 };
 
-window.saveSession=async function(sid){
-  const surah=document.getElementById('sf-surah')?.value;
-  if(!surah){showToast('⚠️ يرجى اختيار السورة');return;}
-  if(!state.sessionForm.stars.mem){showToast('⚠️ يرجى تقييم الحفظ');return;}
-  const data={date:document.getElementById('sf-date')?.value,surah,fromAyah:parseInt(document.getElementById('sf-from')?.value||1),toAyah:parseInt(document.getElementById('sf-to')?.value||1),memRating:state.sessionForm.stars.mem,tajweedRating:state.sessionForm.stars.tajweed||1,commitRating:state.sessionForm.stars.commit||1,mistakes:[...state.sessionForm.mistakes],summary:document.getElementById('sf-summary')?.value||'',meaningSummary:document.getElementById('sf-meaning')?.value||''};
-  try{
-    const id=await fbAddSession(sid,data);
-    const s=state.students.find(x=>x.id===sid);
-    if(s)s.sessions.push({id,...data});
-    state.modal=null;showToast('✅ تم تسجيل الجلسة بنجاح');render();
-  }catch(e){showToast('❌ خطأ: '+e.message);}
+window.saveSession = async function(sid) {
+  const surah = document.getElementById('sf-surah')?.value;
+  if (!surah) { showToast('⚠️ يرجى اختيار السورة'); return; }
+  if (!state.sessionForm.stars.mem) { showToast('⚠️ يرجى تقييم الحفظ'); return; }
+
+  // هيكل البيانات الجديد
+  const data = {
+    date: document.getElementById('sf-date')?.value,
+    surah: surah,
+    fromAyah: parseInt(document.getElementById('sf-from')?.value || 1),
+    toAyah: parseInt(document.getElementById('sf-to')?.value || 1),
+    memRating: state.sessionForm.stars.mem,
+    tajweedRating: state.sessionForm.stars.tajweed || 1,
+    commitRating: state.sessionForm.stars.commit || 1,
+    // هنا نقوم بإرسال المصفوفة التي تحتوي على النوع والملاحظة
+    mistakes: state.sessionForm.mistakes, 
+    summary: document.getElementById('sf-summary')?.value || '',
+    meaningSummary: document.getElementById('sf-meaning')?.value || ''
+  };
+
+  try {
+    const id = await fbAddSession(sid, data);
+    const s = state.students.find(x => x.id === sid);
+    if (s) s.sessions.push({ id, ...data });
+    
+    state.modal = null;
+    showToast('✅ تم تسجيل الجلسة بنجاح');
+    render();
+  } catch (e) {
+    showToast('❌ خطأ: ' + e.message);
+  }
 };
 
 window.createAccountForStudent=async function(studentId){
@@ -1308,7 +1364,7 @@ function render(){
 
   document.getElementById('app').innerHTML=`
     <div class="sidebar">
-      <div class="sidebar-logo"><span class="crescent style=#ffffff;">☽</span><h1>أُنس</h1><p>المعلم الرقمي</p></div>
+      <img src="anas_academy_logo_v5(1).png" alt="أُنس" class="logo-icon">
       <nav class="sidebar-nav">
         <div class="nav-item ${state.page==='dashboard'?'active':''}" onclick="navigate('dashboard')"><span class="nav-icon">🏠</span><span>لوحة التحكم</span></div>
         <div class="nav-item ${state.page==='circles'||state.page==='circleDetail'?'active':''}" onclick="navigate('circles')"><span class="nav-icon">🕌</span><span>الحلقات</span></div>
@@ -1323,6 +1379,10 @@ function render(){
     </div>
     ${modal}`;
 }
+window.toggleElement = function(id) {
+    const el = document.getElementById(id);
+    el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+};
 </script>
 </body>
 </html>
