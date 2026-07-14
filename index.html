@@ -403,6 +403,8 @@ let db,auth,currentUser,currentRole;
 function avgRating(s){if(!s.sessions.length)return 0;return s.sessions.reduce((a,b)=>a+((b.memRating+b.tajweedRating+b.commitRating)/3),0)/s.sessions.length;}
 function avgTajweed(s){if(!s.sessions.length)return 0;return s.sessions.reduce((a,b)=>a+b.tajweedRating,0)/s.sessions.length;}
 function totalMistakes(s){return s.sessions.reduce((a,b)=>a+(b.mistakes||[]).length,0);}
+function mistakeType(m){return typeof m==='string'?m:((m&&m.type)||'');}
+function mistakeNote(m){return typeof m==='string'?'':((m&&m.note)||'');}
 function calcPoints(s){let p=0;s.sessions.forEach(ss=>{p+=(ss.memRating+ss.tajweedRating+ss.commitRating)*10;if(ss.memRating>=4&&ss.tajweedRating>=4)p+=20;});return p;}
 function starsHtml(n){return'★'.repeat(Math.round(n))+'☆'.repeat(5-Math.round(n));}
 function initials(name){return name?name.trim()[0]:'؟';}
@@ -578,7 +580,7 @@ function startStudentPortal(student){
 function renderStudentPortal(s){
   const pts=calcPoints(s),avg=avgRating(s);
   const mc={'تجويد':0,'حفظ':0,'نطق':0};
-  s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{if(mc[m]!==undefined)mc[m]++;}));
+  s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{const t=mistakeType(m);if(mc[t]!==undefined)mc[t]++;}));
   const levelPct=Math.min(100,Math.round(pts/5));
 
   const badgesHtml=BADGES_DEF.map(b=>{
@@ -607,11 +609,11 @@ function renderStudentPortal(s){
         </div>
 	    ${(ss.mistakes||[]).length > 0 ? `
 		  <div class="portal-mistake-tags">
-			${ss.mistakes.map(m => `
-			  <span class="portal-mistake-tag ${m.type==='تجويد'?'tajweed':m.type==='نطق'?'pronunciation':''}" title="${m.note}">
-				${m.type} ${m.note ? ': ' + m.note : ''}
+			${ss.mistakes.map(m => {const t=mistakeType(m),n=mistakeNote(m);return `
+			  <span class="portal-mistake-tag ${t==='تجويد'?'tajweed':t==='نطق'?'pronunciation':''}" title="${n}">
+				${t} ${n ? ': ' + n : ''}
 			  </span>
-			`).join('')}
+			`;}).join('')}
 		  </div>` : ''
 		}       
 		${ss.summary?`<div class="portal-summary">💬 ${ss.summary}</div>`:''}
@@ -718,6 +720,18 @@ async function fbAddSession(studentId,data){
   return ref.id;
 }
 
+async function fbUpdateSession(studentId,sessionId,data){
+  await col('students').doc(studentId).collection('sessions').doc(sessionId).set(data);
+}
+
+async function fbDeleteStudent(studentId){
+  const sessSnap=await col('students').doc(studentId).collection('sessions').get();
+  const batch=db.batch();
+  sessSnap.forEach(d=>batch.delete(d.ref));
+  batch.delete(col('students').doc(studentId));
+  await batch.commit();
+}
+
 async function loadCircles(){
   const snap=await col('circles').orderBy('createdAt','asc').get();
   return snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -770,7 +784,7 @@ window.doLogout=async function(){
 function weekSessions(){const w=new Date(Date.now()-7*24*60*60*1000);let c=0;state.students.forEach(s=>s.sessions.forEach(ss=>{if(new Date(ss.date)>=w)c++;}));return c;}
 function topStudents(){return state.students.filter(s=>s.sessions.length>0).map(s=>({...s,points:calcPoints(s),avg:avgRating(s)})).sort((a,b)=>b.points-a.points).slice(0,5);}
 function attentionStudents(){return state.students.filter(s=>{if(!s.sessions.length)return true;const l=s.sessions[s.sessions.length-1];return l.memRating<=2||l.tajweedRating<=2;});}
-function allMistakes(){const c={'تجويد':0,'حفظ':0,'نطق':0};state.students.forEach(s=>s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{if(c[m]!==undefined)c[m]++;})));return c;}
+function allMistakes(){const c={'تجويد':0,'حفظ':0,'نطق':0};state.students.forEach(s=>s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{const t=mistakeType(m);if(c[t]!==undefined)c[t]++;})));return c;}
 
 /* ═══════════════════════════════════════════════
    CIRCLES RENDER
@@ -985,21 +999,24 @@ function renderStudents(){
 function renderStudentProfile(s){
   const pts=calcPoints(s),avg=avgRating(s);
   const mc={'تجويد':0,'حفظ':0,'نطق':0};
-  s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{if(mc[m]!==undefined)mc[m]++;}));
+  s.sessions.forEach(ss=>(ss.mistakes||[]).forEach(m=>{const t=mistakeType(m);if(mc[t]!==undefined)mc[t]++;}));
   const tabContent=state.tab==='sessions'
     ?(s.sessions.length===0?'<p style="color:var(--text-muted);font-size:13px;padding:20px 0">لا توجد جلسات بعد.</p>'
       :[...s.sessions].reverse().map(ss=>`
         <div class="session-card">
           <div class="session-header">
             <div><div class="session-surah">سورة ${ss.surah}</div><div style="font-size:12px;color:var(--text-muted)">الآيات ${ss.fromAyah}–${ss.toAyah}</div></div>
-            <div style="font-size:12px;color:var(--text-muted)">${formatDate(ss.date)}</div>
+            <div style="text-align:left">
+              <div style="font-size:12px;color:var(--text-muted)">${formatDate(ss.date)}</div>
+              <button class="btn btn-sm btn-outline" style="font-size:11px;padding:3px 10px;margin-top:6px" onclick="openEditSessionModal('${s.id}','${ss.id}')">✏️ تعديل</button>
+            </div>
           </div>
           <div class="session-ratings">
             <div class="session-rating-item"><span class="r-label">حفظ: </span><span class="r-val">${ss.memRating}/5</span><span class="stars" style="font-size:11px">${starsHtml(ss.memRating)}</span></div>
             <div class="session-rating-item"><span class="r-label">تجويد: </span><span class="r-val">${ss.tajweedRating}/5</span></div>
             <div class="session-rating-item"><span class="r-label">التزام: </span><span class="r-val">${ss.commitRating}/5</span></div>
           </div>
-          ${(ss.mistakes||[]).length>0?`<div class="mistake-tags">${ss.mistakes.map(m=>`<span class="mistake-tag ${m==='تجويد'?'tajweed':m==='نطق'?'pronunciation':''}">${m}</span>`).join('')}</div>`:''}
+          ${(ss.mistakes||[]).length>0?`<div class="mistake-tags">${ss.mistakes.map(m=>{const t=mistakeType(m),n=mistakeNote(m);return`<span class="mistake-tag ${t==='تجويد'?'tajweed':t==='نطق'?'pronunciation':''}" title="${n}">${t}${n?': '+n:''}</span>`;}).join('')}</div>`:''}
           ${ss.summary?`<div style="font-size:12px;color:var(--text-muted);margin-top:8px">📝 ${ss.summary}</div>`:''}
         </div>`).join(''))
     :`<div class="mistake-tracker">
@@ -1036,7 +1053,8 @@ function renderStudentProfile(s){
   return`
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
     <button class="btn btn-outline btn-sm" onclick="navigate('students')">← العودة</button>
-    <h2 style="font-size:16px;font-weight:700;color:var(--green-dark)">${s.name}</h2>
+    <h2 style="font-size:16px;font-weight:700;color:var(--green-dark);flex:1">${s.name}</h2>
+    <button class="btn btn-sm" style="background:#fff0f0;color:#c0392b;border:1px solid #ffcccc" onclick="deleteStudent('${s.id}')">🗑️ حذف الطالب</button>
   </div>
   <div class="two-col" style="margin-bottom:20px">
     <div>
@@ -1105,18 +1123,21 @@ function renderAddStudentModal(){
   </div>`;
 }
 
-function renderSessionModal(sid){
+function renderSessionModal(m){
+  const sid=(m&&m.sid)||m;
+  const editing=!!(m&&m.sessionId);
   const sf=state.sessionForm;
+  const attr=v=>String(v==null?'':v).replace(/"/g,'&quot;');
   function starRow(key,label){return`<div class="form-group"><label>${label}</label><div class="rating-input">${[1,2,3,4,5].map(n=>`<button class="star-btn ${sf.stars[key]>=n?'active':''}" onclick="setStar('${key}',${n})">★</button>`).join('')}<span style="font-size:13px;color:var(--text-muted);margin-right:6px">${sf.stars[key]>0?sf.stars[key]+'/5':''}</span></div></div>`;}
   return`<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
     <div class="modal">
-      <div class="modal-header"><h3>📚 تسجيل جلسة جديدة</h3><button class="close-btn" onclick="closeModal()">✕</button></div>
+      <div class="modal-header"><h3>${editing?'✏️ تعديل الجلسة':'📚 تسجيل جلسة جديدة'}</h3><button class="close-btn" onclick="closeModal()">✕</button></div>
       <div class="modal-body">
         <div class="form-grid">
-          <div class="form-group"><label>التاريخ</label><input type="date" id="sf-date" value="${new Date().toISOString().split('T')[0]}"></div>
-          <div class="form-group"><label>اسم السورة</label><select id="sf-surah"><option value="">-- اختر السورة --</option>${SURAHS.map(s=>`<option value="${s}">${s}</option>`).join('')}</select></div>
-          <div class="form-group"><label>من الآية</label><input type="number" id="sf-from" value="1" min="1"></div>
-          <div class="form-group"><label>إلى الآية</label><input type="number" id="sf-to" value="" min="1"></div>
+          <div class="form-group"><label>التاريخ</label><input type="date" id="sf-date" value="${sf.date||new Date().toISOString().split('T')[0]}"></div>
+          <div class="form-group"><label>اسم السورة</label><select id="sf-surah"><option value="">-- اختر السورة --</option>${SURAHS.map(s=>`<option value="${s}" ${sf.surah===s?'selected':''}>${s}</option>`).join('')}</select></div>
+          <div class="form-group"><label>من الآية</label><input type="number" id="sf-from" value="${sf.from!=null?sf.from:1}" min="1"></div>
+          <div class="form-group"><label>إلى الآية</label><input type="number" id="sf-to" value="${sf.to!=null?sf.to:''}" min="1"></div>
           ${starRow('mem','⭐ تقييم الحفظ')}
           ${starRow('tajweed','📖 تقييم التجويد')}
           ${starRow('commit','✅ تقييم الالتزام')}
@@ -1126,22 +1147,22 @@ function renderSessionModal(sid){
 				${['تجويد','حفظ','نطق'].map(m => `
 					<div style="border:1px solid var(--border); padding:8px; border-radius:8px;">
 						<label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
-							<input type="checkbox" onchange="toggleMistake('${m}', this.checked)" ${state.sessionForm.mistakes.find(x=>x.type===m)?'checked':''}> 
+							<input type="checkbox" onchange="toggleMistake('${m}', this.checked)" ${state.sessionForm.mistakes.find(x=>x.type===m)?'checked':''}>
 							${m}
 						</label>
-						${state.sessionForm.mistakes.find(x=>x.type===m) ? 
-							`<input type="text" placeholder="اكتب تفاصيل خطأ ${m} هنا..." onchange="state.sessionForm.mistakes.find(x=>x.type==='${m}').note=this.value" style="width:100%; margin-top:5px;">` 
+						${state.sessionForm.mistakes.find(x=>x.type===m) ?
+							`<input type="text" placeholder="اكتب تفاصيل خطأ ${m} هنا..." value="${attr((state.sessionForm.mistakes.find(x=>x.type===m)||{}).note)}" onchange="state.sessionForm.mistakes.find(x=>x.type==='${m}').note=this.value" style="width:100%; margin-top:5px;">`
 							: ''}
 					</div>
 				`).join('')}
 			</div>
 		  </div>
-          <div class="form-group form-full"><label>ملخص الجلسة</label><textarea id="sf-summary" placeholder="ملاحظات عامة..."></textarea></div>
+          <div class="form-group form-full"><label>ملخص الجلسة</label><textarea id="sf-summary" placeholder="ملاحظات عامة...">${sf.summary||''}</textarea></div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
-        <button class="btn btn-primary" onclick="saveSession('${sid}')">💾 حفظ الجلسة</button>
+        <button class="btn btn-primary" onclick="saveSession('${sid}'${editing?`,'${m.sessionId}'`:''})">💾 ${editing?'حفظ التعديلات':'حفظ الجلسة'}</button>
       </div>
     </div>
   </div>`;
@@ -1224,7 +1245,40 @@ window.navigate=p=>{state.page=p;state.selectedStudent=null;render();};
 window.viewStudent=id=>{state.selectedStudent=id;state.page='profile';state.tab='sessions';render();};
 window.setTab=t=>{state.tab=t;render();};
 window.openAddStudent=()=>{state.form={};state.modal='addStudent';render();};
-window.openSessionModal=sid=>{state.sessionForm={date:new Date().toISOString().split('T')[0],stars:{mem:0,tajweed:0,commit:0},mistakes:[]};state.modal={type:'session',sid};render();};
+window.openSessionModal=sid=>{state.sessionForm={date:new Date().toISOString().split('T')[0],surah:'',from:1,to:'',summary:'',meaningSummary:'',stars:{mem:0,tajweed:0,commit:0},mistakes:[]};state.modal={type:'session',sid};render();};
+window.openEditSessionModal=function(sid,sessionId){
+  const s=state.students.find(x=>x.id===sid);
+  const ss=s&&s.sessions.find(x=>x.id===sessionId);
+  if(!ss){showToast('❌ تعذّر العثور على الجلسة');return;}
+  const mistakes=(ss.mistakes||[]).map(m=>typeof m==='string'?{type:m,note:''}:{type:m.type,note:m.note||''});
+  state.sessionForm={
+    date:ss.date||new Date().toISOString().split('T')[0],
+    surah:ss.surah||'',
+    from:ss.fromAyah!=null?ss.fromAyah:1,
+    to:ss.toAyah!=null?ss.toAyah:'',
+    summary:ss.summary||'',
+    meaningSummary:ss.meaningSummary||'',
+    stars:{mem:ss.memRating||0,tajweed:ss.tajweedRating||0,commit:ss.commitRating||0},
+    mistakes
+  };
+  state.modal={type:'session',sid,sessionId};
+  render();
+};
+window.deleteStudent=async function(studentId){
+  const s=state.students.find(x=>x.id===studentId);
+  if(!s)return;
+  if(!confirm('هل أنتِ متأكدة من حذف الطالب "'+s.name+'"؟\nسيتم حذف جميع جلساته وتقييماته نهائياً، ولا يمكن التراجع عن هذا الإجراء.'))return;
+  try{
+    await fbDeleteStudent(studentId);
+    if(s.studentUid){try{await db.collection('users').doc(s.studentUid).delete();}catch(_){}}
+    state.students=state.students.filter(x=>x.id!==studentId);
+    state.selectedStudent=null;
+    state.page='students';
+    state.modal=null;
+    showToast('✅ تم حذف الطالب');
+    render();
+  }catch(e){showToast('❌ خطأ: '+e.message);}
+};
 window.closeModal=()=>{state.modal=null;render();};
 window.setStar=(k,v)=>{state.sessionForm.stars[k]=v;render();};
 // تعديل في السكريبت
@@ -1250,7 +1304,7 @@ window.saveStudent=async function(){
   }catch(e){showToast('❌ خطأ: '+e.message);}
 };
 
-window.saveSession = async function(sid) {
+window.saveSession = async function(sid, sessionId) {
   const surah = document.getElementById('sf-surah')?.value;
   if (!surah) { showToast('⚠️ يرجى اختيار السورة'); return; }
   if (!state.sessionForm.stars.mem) { showToast('⚠️ يرجى تقييم الحفظ'); return; }
@@ -1265,19 +1319,26 @@ window.saveSession = async function(sid) {
     tajweedRating: state.sessionForm.stars.tajweed || 1,
     commitRating: state.sessionForm.stars.commit || 1,
     // هنا نقوم بإرسال المصفوفة التي تحتوي على النوع والملاحظة
-    mistakes: state.sessionForm.mistakes, 
+    mistakes: state.sessionForm.mistakes,
     summary: document.getElementById('sf-summary')?.value || '',
-    meaningSummary: document.getElementById('sf-meaning')?.value || ''
+    meaningSummary: (document.getElementById('sf-meaning')?.value) || state.sessionForm.meaningSummary || ''
   };
 
   try {
-    const id = await fbAddSession(sid, data);
     const s = state.students.find(x => x.id === sid);
-    if (s) s.sessions.push({ id, ...data });
-    
-    state.modal = null;
-    showToast('✅ تم تسجيل الجلسة بنجاح');
-    render();
+    if (sessionId) {
+      await fbUpdateSession(sid, sessionId, data);
+      if (s) { const idx = s.sessions.findIndex(x => x.id === sessionId); if (idx > -1) s.sessions[idx] = { id: sessionId, ...data }; }
+      state.modal = null;
+      showToast('✅ تم تحديث الجلسة بنجاح');
+      render();
+    } else {
+      const id = await fbAddSession(sid, data);
+      if (s) s.sessions.push({ id, ...data });
+      state.modal = null;
+      showToast('✅ تم تسجيل الجلسة بنجاح');
+      render();
+    }
   } catch (e) {
     showToast('❌ خطأ: ' + e.message);
   }
@@ -1360,7 +1421,7 @@ function render(){
   if(state.modal==='addStudent')modal=renderAddStudentModal();
   else if(state.modal==='addCircle')modal=renderAddCircleModal();
   else if(state.modal&&state.modal.type==='addToCircle')modal=renderAddStudentToCircleModal(state.modal.circleId);
-  else if(state.modal&&state.modal.type==='session')modal=renderSessionModal(state.modal.sid);
+  else if(state.modal&&state.modal.type==='session')modal=renderSessionModal(state.modal);
 
   document.getElementById('app').innerHTML=`
     <div class="sidebar">
